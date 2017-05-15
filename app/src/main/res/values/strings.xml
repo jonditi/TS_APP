@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">TS</string>
+    <string name="locations_data">Locations Data</string>
+    <string name="submit">SUBMIT</string>
+
+    <!-- Elective seats array -->
+    <string-array name="seat">
+        <item>President</item>
+        <item>Governor</item>
+        <item>Senator</item>
+        <item>MP</item>
+        <item>Women Rep</item>
+        <item>MCA</item>
+    </string-array>
+
+    <string name="crop_image_activity_title"> </string>
+    <string name="crop_image_menu_rotate_left">Rotate Left</string>
+    <string name="crop_image_menu_rotate_right">Rotate Right</string>
+    <string name="crop_image_menu_crop">Done</string>
+    <string name="pick_image_intent_chooser_title">Pick Image</string>
 </resources>
