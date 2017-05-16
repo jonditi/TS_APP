@@ -14,6 +14,8 @@ import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
+import com.pathways_international.ts.ui.activity.CropImageActivity;
+
 /**
  * All the possible options that can be set to customize crop image.<br>
  * Initialized with default values.

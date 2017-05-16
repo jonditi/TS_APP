@@ -9,6 +9,8 @@ import android.os.Bundle;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.fragment.MainFragment;
 
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setCustomView(R.layout.actionbar_spinner);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
         }
+        ButterKnife.bind(this);
         initFragments(new MainFragment());
     }
 

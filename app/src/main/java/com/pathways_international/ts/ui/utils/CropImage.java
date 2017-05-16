@@ -30,6 +30,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.pathways_international.ts.R;
+import com.pathways_international.ts.ui.activity.CropImageActivity;
 
 import java.io.File;
 import java.io.InputStream;

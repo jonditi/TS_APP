@@ -1,4 +1,4 @@
-package com.pathways_international.ts.ui.utils;
+package com.pathways_international.ts.ui.activity;
 
 /**
  * Created by android-dev on 5/15/17.
@@ -23,6 +23,9 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.pathways_international.ts.R;
+import com.pathways_international.ts.ui.utils.CropImage;
+import com.pathways_international.ts.ui.utils.CropImageOptions;
+import com.pathways_international.ts.ui.utils.CropImageView;
 
 import java.io.File;
 import java.io.IOException;
