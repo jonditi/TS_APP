@@ -3,19 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <CheckBox
-        android:id="@+id/checkbox1"
-        android:layout_width="wrap_content"
+
+    <EditText
+        android:hint="1"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
+        android:id="@+id/num_input1"
+        android:inputType="number"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="47dp" />
+        android:layout_marginStart="67dp" />
 
-    <CheckBox
-        android:layout_width="wrap_content"
+
+    <EditText
+        android:hint="2"
+        android:id="@+id/num_input2"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:id="@+id/checkbox2"
+        android:layout_marginStart="33dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="98dp" />
+        android:inputType="number"
+        android:layout_toEndOf="@+id/num_input1" />
+
+
 </RelativeLayout>
