@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -79,10 +78,37 @@ public class MainFragment extends Fragment {
 
     private SQLiteHandler sqLiteHandler;
 
-    String[] counties = {"County1", "County2", "County3", "County4"};
-    String[] constituenciesForCounty1 = {"Const1", "Const2"};
+    String[] counties = {"Cty1", "Cty2", "Cty3"};
+    String[] constituenciesForCounty1 = {"Cty1 Const1", "Cty1 Const2"};
+    String[] constituenciesForCounty2 = {"Cty2 Const1", "Cty2 Const2"};
+    String[] constituenciesForCounty3 = {"Cty3 Const1", "Cty3 Const2"};
     String[] wards = {"Ward1", "Ward2"};
+    String[] wardsForCounty1Const1 = {"Cty1 Const1 ward1", "Cty1 Const1 ward2"};
+    String[] wardsForCounty1Const2 = {"Cty1 const2 ward1", "Cty1 const2 ward2"};
+
+    String[] wardsForCounty2Const1 = {"Cty2 Const1 ward1", "Cty2 Const1 ward2"};
+    String[] wardsForCounty2Const2 = {"Cty2 Const2 ward1", "Cty2-Const2 ward2"};
+
+    String[] wardsForCounty3Const1 = {"Cty3 Const1 ward1", "Cty3 Const1 ward2"};
+    String[] wardsForCounty3Const2 = {"Cty3 Const2 ward1", "Cty3 Const2 ward2"};
+
     String[] pollStation = {"PollSt1", "PollSt2"};
+
+    String[] pollStForCt1Const1Ward1 = {"Cty1 Const1 ward1 polst1", "Cty1 Const1 ward1 polst2"};
+    String[] pollStForCt1Const1Ward2 = {"Cty1 Const1 ward2 polst1", "Cty1 Const1 ward2 polst2"};
+    String[] pollStForCt1Const2Ward1 = {"Cty1 Const2 ward1 polst1", "Cty1 Const2 ward1 polst2"};
+    String[] pollStForCt1Const2Ward2 = {"Cty1 Const2 ward2 polst1", "Cty1 Const2 ward2 polst2"};
+
+    String[] pollStForCt2Const1Ward1 = {"Cty2 Const1 ward1 polst1", "Cty2 Const1 ward1 polst2"};
+    String[] pollStForCt2Const1Ward2 = {"Cty2 Const1 ward2 polst1", "Cty2 Const1 ward2 polst2"};
+    String[] pollStForCt2Const2Ward1 = {"Cty2 Const2 ward1 polst1", "Cty2 Const2 ward1 polst2"};
+    String[] pollStForCt2Const2Ward2 = {"Cty2 Const2 ward2 polst1", "Cty2 Const2 ward2 polst2"};
+
+    String[] pollStForCt3Const1Ward1 = {"Cty3 Const1 ward1 polst1", "Cty3 Const1 ward1 polst2"};
+    String[] pollStForCt3Const1Ward2 = {"Cty3 Const1 ward2 polst1", "Cty3 Const1 ward2 polst2"};
+    String[] pollStForCt3Const2Ward1 = {"Cty3 Const2 ward1 polst1", "Cty3 Const2 ward1 polst2"};
+    String[] pollStForCt3Const2Ward2 = {"Cty3 Const2 ward2 polst1", "Cty3 Const2 ward2 polst2"};
+
 
     String countyStr, constStr, wardStr, pollStStr;
 
@@ -120,56 +146,117 @@ public class MainFragment extends Fragment {
         pDialog.setCancelable(false);
 
         sqLiteHandler = new SQLiteHandler(getContext());
-        initViews();
+//        initViews();
 
-//        // County auto complete
-//        countyAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, counties);
-//        edCounty.setThreshold(1);
-//        edCounty.setAdapter(countyAdapter);
+        // County auto complete
+        countyAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, counties);
+        edCounty.setThreshold(1);
+        edCounty.setAdapter(countyAdapter);
         edCounty.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 countyStr = edCounty.getText().toString();
-
+                if (countyStr.equals("Cty1")) {
+                    constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty1);
+                    edConstituency.setAdapter(constAdapter);
+                } else if (countyStr.equals("Cty2")) {
+                    constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty2);
+                    edConstituency.setAdapter(constAdapter);
+                } else if (countyStr.equals("Cty3")) {
+                    constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty3);
+                    edConstituency.setAdapter(constAdapter);
+                }
             }
         });
+
+
 //
-//        // Constituency auto complete
+        // Constituency auto complete
 //        constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty1);
-//        edConstituency.setThreshold(1);
-//        edConstituency.setAdapter(constAdapter);
+        edConstituency.setThreshold(1);
         edConstituency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 constStr = edConstituency.getText().toString();
+                if (constStr.equals("Cty1 Const1")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty1Const1);
+                    edWard.setAdapter(wardAdapter);
+                } else if (constStr.equals("Cty1 Const2")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty1Const2);
+                    edWard.setAdapter(wardAdapter);
+                } else if (constStr.equals("Cty2 Const1")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty2Const1);
+                    edWard.setAdapter(wardAdapter);
+                } else if (constStr.equals("Cty2 Const2")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty2Const2);
+                    edWard.setAdapter(wardAdapter);
+                } else if (constStr.equals("Cty3 Const1")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty3Const1);
+                    edWard.setAdapter(wardAdapter);
+                } else if (constStr.equals("Cty3 Const2")) {
+                    wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wardsForCounty3Const2);
+                    edWard.setAdapter(wardAdapter);
+                }
             }
         });
-//
-        // Ward auto complete
-        wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wards);
+////
+//        // Ward auto complete
+
         edWard.setThreshold(1);
-        edWard.setAdapter(wardAdapter);
         edWard.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 wardStr = edWard.getText().toString();
+                if (wardStr.equals("Cty1 Const1 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt1Const1Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty1 Const1 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt1Const1Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty1 Const2 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt1Const2Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty1 Const2 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt1Const2Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty2 Const1 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt2Const1Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty2 Const1 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt2Const1Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty2 Const2 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt2Const2Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty2 Const2 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt2Const2Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty3 Const1 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt3Const1Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty3 Const1 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt3Const1Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty3 Const2 ward1")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt3Const2Ward1);
+                    edPollStation.setAdapter(pollAdapter);
+                } else if (wardStr.equals("Cty3 Const2 ward2")) {
+                    pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStForCt3Const2Ward2);
+                    edPollStation.setAdapter(pollAdapter);
+                }
             }
         });
+//
+//        // Poll Station auto complete
 
-        // Poll Station auto complete
-        pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStation);
         edPollStation.setThreshold(1);
-        edPollStation.setAdapter(pollAdapter);
+
         edPollStation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = edPollStation.getText().toString();
             }
         });
-
-
-
-
 
 
         imagePicker.setCropImage(true);
@@ -466,7 +553,6 @@ public class MainFragment extends Fragment {
         super.onAttach(activity);
         parentActivity = activity;
     }
-
 
 
 }
