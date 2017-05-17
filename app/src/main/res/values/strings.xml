@@ -18,4 +18,5 @@
     <string name="crop_image_menu_rotate_right">Rotate Right</string>
     <string name="crop_image_menu_crop">Done</string>
     <string name="pick_image_intent_chooser_title">Pick Image</string>
+    <string name="base_url">https://fundilistapp.com/api/public/v1/</string>
 </resources>
