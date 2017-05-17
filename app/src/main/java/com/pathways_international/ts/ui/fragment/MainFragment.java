@@ -169,6 +169,7 @@ public class MainFragment extends Fragment {
         edPollStation.setText("");
         numInput1.setText("");
         numInput2.setText("");
+        imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
     }
@@ -183,6 +184,7 @@ public class MainFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         imagePicker.onActivityResult(this, requestCode, resultCode, data);
+
     }
 
     @Override
