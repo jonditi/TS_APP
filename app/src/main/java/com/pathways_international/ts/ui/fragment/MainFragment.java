@@ -73,6 +73,14 @@ public class MainFragment extends Fragment {
     EditText numInput1;
     @BindView(R.id.num_input2)
     EditText numInput2;
+    @BindView(R.id.county_spinner)
+    Spinner countySpinner;
+    @BindView(R.id.constituency_spinner)
+    Spinner constituencySpinner;
+    @BindView(R.id.ward_spinner)
+    Spinner wardSpinner;
+    @BindView(R.id.poll_spinner)
+    Spinner pollSpinner;
 
     private int position = 0;
     private ImagePicker imagePicker = new ImagePicker();
@@ -120,56 +128,103 @@ public class MainFragment extends Fragment {
         pDialog.setCancelable(false);
 
         sqLiteHandler = new SQLiteHandler(getContext());
-        initViews();
+        if (sqLiteHandler.getRowCount() <= 0) {
+            sampleQuery();
+        }
+//        initViews();
 
 //        // County auto complete
 //        countyAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, counties);
 //        edCounty.setThreshold(1);
 //        edCounty.setAdapter(countyAdapter);
-        edCounty.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                countyStr = edCounty.getText().toString();
-
-            }
-        });
+//        edCounty.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                countyStr = edCounty.getText().toString();
 //
-//        // Constituency auto complete
-//        constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty1);
-//        edConstituency.setThreshold(1);
-//        edConstituency.setAdapter(constAdapter);
-        edConstituency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            }
+//        });
+
+        loadCounties();
+        countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                constStr = edConstituency.getText().toString();
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                loadConstituencies(parent.getItemAtPosition(position).toString());
+                countyStr = parent.getItemAtPosition(position).toString();
+                constituencySpinner.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
+
+        constituencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                loadWards(parent.getItemAtPosition(position).toString());
+                constStr = parent.getItemAtPosition(position).toString();
+                wardSpinner.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        wardSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                loadPollStations(parent.getItemAtPosition(position).toString());
+                wardStr = parent.getItemAtPosition(position).toString();
+                pollSpinner.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        pollStStr = String.valueOf(pollSpinner.getSelectedItem());
+
+
+//        sampleQuery();
+////
+////        // Constituency auto complete
+////        constAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, constituenciesForCounty1);
+////        edConstituency.setThreshold(1);
+////        edConstituency.setAdapter(constAdapter);
+//        edConstituency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                constStr = edConstituency.getText().toString();
+//            }
+//        });
+////
+//        // Ward auto complete
+//        wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wards);
+//        edWard.setThreshold(1);
+//        edWard.setAdapter(wardAdapter);
+//        edWard.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                wardStr = edWard.getText().toString();
+//            }
+//        });
 //
-        // Ward auto complete
-        wardAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, wards);
-        edWard.setThreshold(1);
-        edWard.setAdapter(wardAdapter);
-        edWard.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                wardStr = edWard.getText().toString();
-            }
-        });
-
-        // Poll Station auto complete
-        pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStation);
-        edPollStation.setThreshold(1);
-        edPollStation.setAdapter(pollAdapter);
-        edPollStation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                pollStStr = edPollStation.getText().toString();
-            }
-        });
-
-
-
-
+//        // Poll Station auto complete
+//        pollAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_expandable_list_item_1, pollStation);
+//        edPollStation.setThreshold(1);
+//        edPollStation.setAdapter(pollAdapter);
+//        edPollStation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                pollStStr = edPollStation.getText().toString();
+//            }
+//        });
 
 
         imagePicker.setCropImage(true);
@@ -185,10 +240,11 @@ public class MainFragment extends Fragment {
             Log.d("Parse Estates: ", locationsPreference.getCountyList());
         }
         // hide location views
-        edConstituency.setVisibility(View.INVISIBLE);
-        edWard.setVisibility(View.INVISIBLE);
-        edPollStation.setVisibility(View.INVISIBLE);
+//        edConstituency.setVisibility(View.INVISIBLE);
+//        edWard.setVisibility(View.INVISIBLE);
+//        edPollStation.setVisibility(View.INVISIBLE);
 //        tvTitle.setVisibility(View.INVISIBLE);
+
 
         edCounty.addTextChangedListener(new TextWatcher() {
             @Override
@@ -217,6 +273,27 @@ public class MainFragment extends Fragment {
                 }
             }
         });
+
+        // County Spinner
+//        countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                for (LocationModel county : countyModelList) {
+//                    if (county.getCounty_label().equals(parent.getItemAtPosition(position).toString().toUpperCase())) {
+//
+//                        locationsRequestVolley("locations/county/" + county.getCounty_id(), "places");
+//                        Log.d("dialog_shon", requestedStarted.toString());
+//                    } else {
+////                        doneBtn.setVisibility(View.INVISIBLE);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
         edConstituency.addTextChangedListener(new TextWatcher() {
             @Override
@@ -289,6 +366,43 @@ public class MainFragment extends Fragment {
 
     }
 
+    private void loadCounties() {
+        List<String> countyList = sqLiteHandler.getCounties();
+        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                countyList);
+
+        countySpinner.setAdapter(countyAdapter);
+
+    }
+
+    private void loadConstituencies(String county) {
+        List<String> constList = sqLiteHandler.getConstituencies(county);
+        Log.d(LOG_TAG, "Size sssssssss" + constList.size());
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                constList);
+
+        constituencySpinner.setAdapter(countyAdapter);
+    }
+
+    private void loadWards(String constituency) {
+        List<String> countyList = sqLiteHandler.getWards(constituency);
+        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                countyList);
+
+        wardSpinner.setAdapter(countyAdapter);
+    }
+
+    private void loadPollStations(String ward) {
+        List<String> countyList = sqLiteHandler.getPollStations(ward);
+        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                countyList);
+
+        pollSpinner.setAdapter(countyAdapter);
+    }
+
     private void parseLocationData(String list, String variant) {
         try {
             JSONObject dataObject = new JSONObject(list);
@@ -315,6 +429,52 @@ public class MainFragment extends Fragment {
         CountyAutoCompleteAdapter regionAutoCompleteAdapter = new CountyAutoCompleteAdapter(parentActivity,
                 R.layout.autocomplete_row_item, countyModelList, variant);
         edCounty.setAdapter(regionAutoCompleteAdapter);
+    }
+
+
+    private void sampleQuery() {
+        pDialog.setMessage("Fetching places data...");
+        pDialog.show();
+        Log.d(LOG_TAG, "Exceddd");
+        StringRequest request = new StringRequest(Request.Method.GET, "http://inovatec.co.ke/redwood/table10.php",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        pDialog.dismiss();
+                        Log.d(LOG_TAG, response);
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("location");
+                            Log.d(LOG_TAG, "" + jsonArray.length());
+                            if (jsonArray.length() > 0) {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject obj = jsonArray.getJSONObject(i);
+                                    String id = obj.getString("id");
+                                    String county = obj.getString("county");
+                                    String constituency = obj.getString("constituency");
+                                    String ward = obj.getString("ward");
+                                    String pollStation = obj.getString("poll_st");
+
+                                    if (sqLiteHandler.getRowCount() < jsonArray.length()) {
+                                        sqLiteHandler.addToLoc(county, id, constituency, ward, pollStation);
+                                    }
+                                }
+                            }
+                            loadCounties();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                pDialog.dismiss();
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(request);
     }
 
     public void locationsRequestVolley(final String url, final String variant) {
@@ -352,10 +512,13 @@ public class MainFragment extends Fragment {
                                 Log.d("locatiion_req", e.toString());
                             }
                             ConstituencyAutoCompleteAdapter regionAutoCompleteAdapter = new ConstituencyAutoCompleteAdapter(parentActivity,
-                                    R.layout.autocomplete_row_item, locationModelList, "location");
-                            edConstituency.setAdapter(regionAutoCompleteAdapter);
+                                    android.R.layout.simple_dropdown_item_1line, locationModelList, "location");
+//                            edConstituency.setAdapter(regionAutoCompleteAdapter);
+                            constituencySpinner.setAdapter(regionAutoCompleteAdapter);
+                            constituencySpinner.setVisibility(View.VISIBLE);
 
-                            edConstituency.setVisibility(View.VISIBLE);
+
+//                            edConstituency.setVisibility(View.VISIBLE);
 //                            tvTitle.setVisibility(View.VISIBLE);
 
                         } else {

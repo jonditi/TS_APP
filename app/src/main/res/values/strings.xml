@@ -13,6 +13,16 @@
         <item>MCA</item>
     </string-array>
 
+    <!-- Counties array -->
+    <string-array name="counties">
+        <item>MOMBASA</item>
+        <item>NAIROBI</item>
+        <item>KISUMU</item>
+        <item>SIAYA</item>
+        <item>HOMA BAY</item>
+        <item>KIAMBU</item>
+    </string-array>
+
     <string name="crop_image_activity_title"> </string>
     <string name="crop_image_menu_rotate_left">Rotate Left</string>
     <string name="crop_image_menu_rotate_right">Rotate Right</string>

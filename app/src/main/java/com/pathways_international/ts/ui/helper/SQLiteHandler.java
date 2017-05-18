@@ -2,9 +2,12 @@ package com.pathways_international.ts.ui.helper;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
  * Created by android-dev on 5/16/17.
@@ -27,6 +30,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     //  table two
     private static final String TABLE_TWO = "two";
+
+    // loc table;
+    private static final String TABLE_LOC = "location_all";
 
     // Column names
     private static final String KEY_ID = "id";
@@ -56,12 +62,20 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_NUM_ONE + " TEXT," + KEY_NUM_TWO + " TEXT,"
                 + KEY_SEAT + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_TWO);
+
+        String CREATE_TABLE_LOC = "CREATE TABLE IF NOT EXISTS " + TABLE_LOC + "("
+                + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_COUNTY + " TEXT,"
+                + KEY_CONSTITUENCY + " TEXT," + KEY_WARD + " TEXT,"
+                + KEY_POLL_STATION_ID + " TEXT,"
+                + KEY_POLL_STATION + " TEXT" + ")";
+        db.execSQL(CREATE_TABLE_LOC);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ONE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TWO);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOC);
     }
 
     public void addToTableOne(String county, String constituency, String ward, String pollStation) {
@@ -91,4 +105,117 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         Log.d(TAG, "Data inserted in table two:" + id);
     }
+
+    public void addToLoc(String county, String pollStId, String constituency, String ward, String pollStation) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_COUNTY, county);
+        values.put(KEY_POLL_STATION_ID, pollStId);
+        values.put(KEY_CONSTITUENCY, constituency);
+        values.put(KEY_WARD, ward);
+        values.put(KEY_POLL_STATION, pollStation);
+
+        long id = db.insert(TABLE_LOC, null, values);
+        Log.d(TAG, "Data inserted in table one:" + id);
+    }
+
+
+    public int getRowCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_LOC;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int rowCount = cursor.getCount();
+        db.close();
+        cursor.close();
+
+        // return row count
+        return rowCount;
+    }
+
+    public ArrayList<String> getCounties() {
+        ArrayList<String> countyList = new ArrayList<>();
+        String sql = "SELECT DISTINCT county FROM " + TABLE_LOC + " ORDER BY county ASC";
+
+        SQLiteDatabase database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int countyIndex = cursor.getColumnIndex("county");
+                String county = cursor.getString(countyIndex);
+                countyList.add(county);
+//
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        database.close();
+
+        return countyList;
+    }
+
+    public ArrayList<String> getConstituencies(String county) {
+        ArrayList<String> countyList = new ArrayList<>();
+        String sql = "SELECT constituency FROM " + TABLE_LOC + " WHERE county = " + "'" + county + "'" + " ORDER BY constituency ASC";
+
+        SQLiteDatabase database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int constituencyIndex = cursor.getColumnIndex("constituency");
+                String constituency = cursor.getString(constituencyIndex);
+                countyList.add(constituency);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        database.close();
+
+        return countyList;
+    }
+
+    public ArrayList<String> getWards(String constituency) {
+        ArrayList<String> countyList = new ArrayList<>();
+        String sql = "SELECT ward FROM " + TABLE_LOC + " WHERE constituency = " + "'" + constituency + "'" + " ORDER BY ward ASC";
+
+        SQLiteDatabase database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int wardIndex = cursor.getColumnIndex("ward");
+                String ward = cursor.getString(wardIndex);
+                countyList.add(ward);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        database.close();
+
+        return countyList;
+    }
+
+    public ArrayList<String> getPollStations(String ward) {
+        ArrayList<String> countyList = new ArrayList<>();
+        String sql = "SELECT poll_station FROM " + TABLE_LOC + " WHERE ward = " + "'" + ward + "'" + " ORDER BY poll_station ASC";
+
+        SQLiteDatabase database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int pollStIndex = cursor.getColumnIndex("poll_station");
+                String pollStation = cursor.getString(pollStIndex);
+                countyList.add(pollStation);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        database.close();
+
+        return countyList;
+    }
+
+
+
+
+
 }
