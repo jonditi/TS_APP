@@ -15,12 +15,53 @@
 
     <!-- Counties array -->
     <string-array name="counties">
-        <item>MOMBASA</item>
-        <item>NAIROBI</item>
-        <item>KISUMU</item>
-        <item>SIAYA</item>
-        <item>HOMA BAY</item>
-        <item>KIAMBU</item>
+        <item>Baringo</item>
+        <item>Bomet</item>
+        <item>Bungoma</item>
+        <item>Busia</item>
+        <item>Elgeyo/Marakwet</item>
+        <item>Embu</item>
+        <item>Garissa</item>
+        <item>Isiolo</item>
+        <item>Kajiado</item>
+        <item>Kericho</item>
+        <item>Kakamega</item>
+        <item>Kiambu</item>
+        <item>Kilifi</item>
+        <item>Kirinyiga</item>
+        <item>Kisii</item>
+        <item>Kisumu</item>
+        <item>Kitui</item>
+        <item>Kwale</item>
+        <item>Laikipia</item>
+        <item>Lamu</item>
+        <item>Machakos</item>
+        <item>Makueni</item>
+        <item>Mandera</item>
+        <item>Mandera</item>
+        <item>Marsabit</item>
+        <item>Meru</item>
+        <item>Migori</item>
+        <item>Mombasa</item>
+        <item>Murang\'a</item>
+        <item>Nairobi City</item>
+        <item>Nakuru</item>
+        <item>Nandi</item>
+        <item>Narok</item>
+        <item>Nyamira</item>
+        <item>Nyandarua</item>
+        <item>Nyeri</item>
+        <item>Samburu</item>
+        <item>Siaya</item>
+        <item>Taita Taveta</item>
+        <item>Tana River</item>
+        <item>Tharaka Nithi</item>
+        <item>Trans Nzoia</item>
+        <item>Turkana</item>
+        <item>Uasin Gishu</item>
+        <item>Vihiga</item>
+        <item>Wajir</item>
+        <item>West Pokot</item>
     </string-array>
 
     <string name="crop_image_activity_title"> </string>

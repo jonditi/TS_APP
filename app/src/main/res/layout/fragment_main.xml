@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context="com.pathways_international.ts.ui.fragment.MainFragment">
 
 
@@ -12,15 +12,15 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/imageview_container"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
                 android:src="@drawable/ic_camera" />
 
 
@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="30dp"
+                android:padding="5dp"
                 android:text="@string/locations_data"
                 android:textColor="@color/colorPrimary"
                 android:textSize="22sp" />
@@ -42,8 +42,9 @@
 
             <Spinner
                 android:id="@+id/county_spinner"
-                android:layout_width="176dp"
-                android:layout_height="wrap_content" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/counties" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -51,10 +52,10 @@
                 android:text="Constituency" />
 
             <Spinner
-                android:visibility="invisible"
                 android:id="@+id/constituency_spinner"
-                android:layout_width="176dp"
-                android:layout_height="wrap_content" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -62,10 +63,10 @@
                 android:text="Ward" />
 
             <Spinner
-                android:visibility="invisible"
                 android:id="@+id/ward_spinner"
-                android:layout_width="176dp"
-                android:layout_height="wrap_content" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
 
 
             <TextView
@@ -75,10 +76,10 @@
 
 
             <Spinner
-                android:visibility="invisible"
                 android:id="@+id/poll_spinner"
-                android:layout_width="176dp"
-                android:layout_height="wrap_content" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
 
             <AutoCompleteTextView
                 android:id="@+id/county"
@@ -91,34 +92,34 @@
                 android:visibility="gone" />
 
             <AutoCompleteTextView
-                android:visibility="gone"
                 android:id="@+id/constituency"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:hint="Constituency"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:visibility="gone" />
 
             <AutoCompleteTextView
                 android:id="@+id/ward"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:hint="Ward"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:visibility="gone" />
 
             <AutoCompleteTextView
-                android:visibility="gone"
                 android:id="@+id/polling_station"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:hint="Polling Station"
-                android:padding="10dp" />
+                android:padding="10dp"
+                android:visibility="gone" />
 
             <include layout="@layout/checkboxes" />
 
@@ -127,8 +128,8 @@
                 android:id="@+id/submit_button"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
                 android:layout_gravity="center_horizontal"
+                android:layout_margin="20dp"
                 android:background="@color/colorPrimary"
                 android:clickable="true"
                 android:text="@string/submit"

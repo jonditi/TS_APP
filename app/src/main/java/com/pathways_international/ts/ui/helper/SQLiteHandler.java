@@ -19,7 +19,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Database Name
     private static final String DATABASE_NAME = "top_secret";
@@ -33,6 +33,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // loc table;
     private static final String TABLE_LOC = "location_all";
+    private static final String TABLE_CONSTITUENCIES = "constituencies";
+    private static final String TABLE_WARDS = "wards";
+    private static final String TABLE_POLL_STATIONS = "poll_stations";
 
     // Column names
     private static final String KEY_ID = "id";
@@ -57,6 +60,22 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_POLL_STATION + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_ONE);
 
+        String CREATE_TABLE_CONSTITUENCIES = "CREATE TABLE IF NOT EXISTS " + TABLE_CONSTITUENCIES + "("
+                + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_CONSTITUENCY + " TEXT" + ")";
+        db.execSQL(CREATE_TABLE_CONSTITUENCIES);
+
+
+        String CREATE_TABLE_WARDS = "CREATE TABLE IF NOT EXISTS " + TABLE_WARDS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_WARD + " TEXT" + ")";
+        db.execSQL(CREATE_TABLE_WARDS);
+
+
+        String CREATE_TABLE_POLL_STATIONS = "CREATE TABLE IF NOT EXISTS " + TABLE_POLL_STATIONS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_POLL_STATION + " TEXT,"
+                + KEY_POLL_STATION_ID + " TEXT"
+                + ")";
+        db.execSQL(CREATE_TABLE_POLL_STATIONS);
+
         String CREATE_TABLE_TWO = "CREATE TABLE IF NOT EXISTS " + TABLE_TWO + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_POLL_STATION_ID + " TEXT,"
                 + KEY_NUM_ONE + " TEXT," + KEY_NUM_TWO + " TEXT,"
@@ -69,6 +88,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_POLL_STATION_ID + " TEXT,"
                 + KEY_POLL_STATION + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_LOC);
+
+
     }
 
     @Override
@@ -76,6 +97,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ONE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TWO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOC);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONSTITUENCIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_WARDS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_POLL_STATIONS);
     }
 
     public void addToTableOne(String county, String constituency, String ward, String pollStation) {
@@ -118,6 +142,55 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         long id = db.insert(TABLE_LOC, null, values);
         Log.d(TAG, "Data inserted in table one:" + id);
+    }
+
+    public void insertIntoConst(String constituency) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_CONSTITUENCY, constituency);
+
+        long id = db.insert(TABLE_CONSTITUENCIES, null, values);
+        Log.d(TAG, "Constituency inserted:" + id);
+    }
+
+    public void deleteConsti() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CONSTITUENCIES, null, null);
+        db.close();
+    }
+
+    public void insertIntoWard(String ward) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_WARD, ward);
+
+        long id = db.insert(TABLE_WARDS, null, values);
+        Log.d(TAG, "ward inserted:" + id);
+    }
+
+    public void deleteWards() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_WARDS, null, null);
+        db.close();
+    }
+
+    public void insertIntoPollStations(String pollStation, String pollStationId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_POLL_STATION, pollStation);
+        values.put(KEY_POLL_STATION_ID, pollStationId);
+
+        long id = db.insert(TABLE_CONSTITUENCIES, null, values);
+        Log.d(TAG, "PollStation inserted:" + id);
+    }
+
+    public void deletePollSt() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_POLL_STATIONS, null, null);
+        db.close();
     }
 
 
