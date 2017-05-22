@@ -321,7 +321,7 @@ public class MainFragment extends Fragment {
     private void loadPollStationsRemote(String wardStr) {
         pDialog.setMessage("Loading poll stations");
         pDialog.dismiss();
-        wardStr = wardStr.replace(" ", wardStr);
+        wardStr = wardStr.replace(" ", "%20");
         Log.d(LOG_TAG, wardStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STATION + wardStr, new Response.Listener<String>() {
             @Override
@@ -337,11 +337,12 @@ public class MainFragment extends Fragment {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String ward = obj.getString("poll_station");
-//                            String id = obj.getString("id");
-//                            pollStationId.add(id);
+                            String id = obj.getString("id");
+                            pollStationId.add(id);
                             pollStationList.add(ward);
                         }
 
+                        Log.d(LOG_TAG, "" + pollStationId.size());
                         pollAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, pollStationList);
                         pollSpinner.setAdapter(pollAdapter);
                         pollSpinner.setVisibility(View.VISIBLE);
