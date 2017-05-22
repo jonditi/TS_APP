@@ -235,7 +235,8 @@ public class MainFragment extends Fragment {
         pDialog.setMessage("Loading constituencies");
         pDialog.show();
         pDialog.setCancelable(true);
-        countyStr = countyStr.trim();
+        countyStr = countyStr.replace(" ", "%20");
+        Log.d(LOG_TAG, countyStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.CONSTITUENCIES + countyStr, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -279,6 +280,8 @@ public class MainFragment extends Fragment {
     private void loadWardsRemote(String constStr) {
         pDialog.setMessage("Loading Wards");
         pDialog.show();
+        constStr = constStr.replace(" ", "%20");
+        Log.d(LOG_TAG, constStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.WARDS + constStr, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -318,6 +321,8 @@ public class MainFragment extends Fragment {
     private void loadPollStationsRemote(String wardStr) {
         pDialog.setMessage("Loading poll stations");
         pDialog.dismiss();
+        wardStr = wardStr.replace(" ", wardStr);
+        Log.d(LOG_TAG, wardStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STATION + wardStr, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
