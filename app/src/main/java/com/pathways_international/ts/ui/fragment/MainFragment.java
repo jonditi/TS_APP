@@ -4,12 +4,15 @@ package com.pathways_international.ts.ui.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +47,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +89,8 @@ public class MainFragment extends Fragment {
     Spinner pollSpinner;
 
     String num1, num2;
+
+    Bitmap bitmap;
 
     private int position = 0;
     private ImagePicker imagePicker = new ImagePicker();
@@ -597,7 +605,15 @@ public class MainFragment extends Fragment {
             public void onCropImage(Uri imageUri) {
                 super.onCropImage(imageUri);
                 if (position == 1) {
-                    imageViewContainer.setImageURI(imageUri);
+//                    imageViewContainer.setImageURI(imageUri);
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                        imageViewContainer.setImageBitmap(bitmap);
+                        uploadImageClient();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -610,6 +626,62 @@ public class MainFragment extends Fragment {
                         .setAspectRatio(1, 1);
             }
         });
+    }
+
+    public String getStringImage(Bitmap bmp) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+        return "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
+    }
+
+    private void uploadImageClient() {
+//        progressBar.setVisibility(View.VISIBLE);
+        Log.d("Image upload", "started");
+        StringRequest request = new StringRequest(Request.Method.POST, "https://fundilistapp.com/api/v1/client_avatar",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        Log.d("Upload image", s);
+//                        progressBar.setVisibility(View.GONE);
+                        try {
+                            JSONObject jsonObject = new JSONObject(s);
+                            boolean error = jsonObject.getBoolean("error");
+                            if (!error) {
+                                String avatarUrl = jsonObject.getString("avatar");
+
+                                Log.d("CLIENT PROFILE PIC", avatarUrl);
+
+                                Log.d("Edit Profile Response", "Success");
+//                                locationSharedPrefs.setAvatarUrl(avatarUrl);
+//                                finish();
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+//                progressBar.setVisibility(View.GONE);
+//                Log.d("Upliad error", volleyError.getMessage());
+//                finish();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                String image = getStringImage(bitmap);
+
+                Map<String, String> params = new HashMap<>();
+                params.put("client_id", "90");
+                params.put("image", image);
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
+
     }
 
     @Override

@@ -21,10 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activity.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
+        <activity
+            android:name=".ui.fragment.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package com.pathways_international.ts.ui.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
@@ -16,6 +17,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.fragment.MainFragment;
+import com.pathways_international.ts.ui.fragment.SettingsActivity;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 
 import org.json.JSONArray;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sqLiteHandler = new SQLiteHandler(getApplicationContext());
+//        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
