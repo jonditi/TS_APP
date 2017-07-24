@@ -595,7 +595,7 @@ public class MainFragment extends Fragment {
     }
 
     private void startChooser() {
-        imagePicker.startChooser(this, new ImagePicker.Callback() {
+        imagePicker.startCamera(this, new ImagePicker.Callback() {
             @Override
             public void onPickImage(Uri imageUri) {
 
@@ -609,7 +609,7 @@ public class MainFragment extends Fragment {
                     try {
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                         imageViewContainer.setImageBitmap(bitmap);
-                        uploadImageClient();
+//                        uploadImageClient();
 
                     } catch (IOException e) {
                         e.printStackTrace();

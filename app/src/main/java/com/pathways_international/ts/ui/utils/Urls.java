@@ -8,7 +8,7 @@ public class Urls {
     // Default config for real devices
     private static String baseUrl =
             // ip of your machine
-            "http://inovatec.co.ke/redwood/";
+            "http://fundilistapp.com/ts/";
     // Server patient login url
     public static String CONSTITUENCIES = baseUrl + "constituency.php?county=";
     public static String WARDS = baseUrl + "ward.php?constituency=";
