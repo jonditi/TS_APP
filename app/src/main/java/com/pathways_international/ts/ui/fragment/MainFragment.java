@@ -794,6 +794,7 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onResponse(String s) {
                         Log.d("Upload image", s);
+                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
                         pDialog.dismiss();
 //                        progressBar.setVisibility(View.GONE);
 //                        try {
