@@ -1,33 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/dida_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/dida_total"
+            android:layout_alignBottom="@+id/dida_total"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="Dida"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/uhuru_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/raila_total"
+            android:layout_alignBottom="@+id/raila_total"
+            android:layout_centerHorizontal="true"
+            android:text="Uhuru"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/dida_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/raila_total"
+            android:layout_alignStart="@+id/raila_total"
+            android:layout_below="@+id/raila_total"
+            android:layout_marginTop="20dp"
+            android:hint="0"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/nyagah_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:inputType="number"
+            android:layout_alignBottom="@+id/nyagah_text"
+            android:layout_alignLeft="@+id/dida_total"
+            android:layout_alignStart="@+id/dida_total" />
+
+        <EditText
+            android:id="@+id/mwaura_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:inputType="number"
+            android:layout_alignBottom="@+id/jirongo_text"
+            android:layout_alignLeft="@+id/nyagah_total"
+            android:layout_alignStart="@+id/nyagah_total" />
+
+        <TextView
+            android:id="@+id/raila_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/raila_total"
+            android:layout_alignBottom="@+id/raila_total"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="Raila"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/aukot_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aukot"
+            android:textSize="18sp"
+            android:layout_alignBaseline="@+id/dida_total"
+            android:layout_alignBottom="@+id/dida_total"
+            android:layout_alignLeft="@+id/uhuru_text"
+            android:layout_alignStart="@+id/uhuru_text" />
+
+        <TextView
+            android:id="@+id/kaluyu_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kaluyu"
+            android:textSize="18sp"
+            android:layout_alignLeft="@+id/aukot_text"
+            android:layout_alignStart="@+id/aukot_text"
+            android:layout_alignBottom="@+id/nyagah_total" />
+
+        <TextView
+            android:id="@+id/mwaura_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/nyagah_text"
+            android:layout_marginTop="40dp"
+            android:text="Mwaura"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/textView14"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/nyagah_total"
+            android:layout_alignLeft="@+id/aukot_text"
+            android:layout_alignStart="@+id/aukot_text"
+            android:text=""
+            android:textSize="18sp"
+            android:layout_below="@+id/kaluyu_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nyagah"
+            android:textSize="18sp"
+            android:id="@+id/nyagah_text"
+            android:layout_below="@+id/dida_total"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="38dp" />
 
 
-    <EditText
-        android:hint="1"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/num_input1"
-        android:inputType="number"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="67dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="67dp" />
+        <TextView
+            android:id="@+id/jirongo_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jirongo"
+            android:textSize="18sp"
+            android:layout_alignBaseline="@+id/mwaura_text"
+            android:layout_alignBottom="@+id/mwaura_text"
+            android:layout_alignLeft="@+id/textView14"
+            android:layout_alignStart="@+id/textView14" />
+
+        <EditText
+            android:hint="0"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/raila_total"
+            android:inputType="number"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/nyagah_text"
+            android:layout_toEndOf="@+id/nyagah_text" />
 
 
-    <EditText
-        android:hint="2"
-        android:id="@+id/num_input2"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="33dp"
-        android:layout_alignParentTop="true"
-        android:inputType="number"
-        android:layout_toEndOf="@+id/num_input1"
-        android:layout_marginLeft="33dp"
-        android:layout_toRightOf="@+id/num_input1" />
+        <EditText
+            android:hint="0"
+            android:id="@+id/aukot_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:layout_alignBaseline="@+id/aukot_text"
+            android:layout_alignBottom="@+id/aukot_text"
+            android:layout_alignLeft="@+id/uhuru_total"
+            android:layout_alignStart="@+id/uhuru_total" />
+
+        <EditText
+            android:id="@+id/kaluyu_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:inputType="number"
+            android:layout_alignBottom="@+id/kaluyu_text"
+            android:layout_alignLeft="@+id/aukot_total"
+            android:layout_alignStart="@+id/aukot_total" />
+
+        <EditText
+            android:id="@+id/jirongo_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:inputType="number"
+            android:layout_alignBaseline="@+id/mwaura_total"
+            android:layout_alignBottom="@+id/mwaura_total"
+            android:layout_alignLeft="@+id/kaluyu_total"
+            android:layout_alignStart="@+id/kaluyu_total" />
+
+        <EditText
+            android:id="@+id/uhuru_total"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_toEndOf="@+id/aukot_text"
+            android:layout_toRightOf="@+id/aukot_text"
+            android:hint="0"
+            android:inputType="number" />
 
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</ScrollView>

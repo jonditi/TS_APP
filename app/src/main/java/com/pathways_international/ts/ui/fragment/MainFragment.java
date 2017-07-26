@@ -85,10 +85,45 @@ public class MainFragment extends Fragment {
     Button buttonSubmit;
     @BindView(R.id.imageview_container)
     ImageView imageViewContainer;
-    @BindView(R.id.num_input1)
-    EditText numInput1;
-    @BindView(R.id.num_input2)
-    EditText numInput2;
+
+    @BindView(R.id.raila_text)
+    TextView railaText;
+    @BindView(R.id.uhuru_text)
+    TextView uhuruText;
+    @BindView(R.id.dida_text)
+    TextView didaText;
+    @BindView(R.id.nyagah_text)
+    TextView nyagahText;
+    @BindView(R.id.jirongo_text)
+    TextView jirongoText;
+    @BindView(R.id.aukot_text)
+    TextView aukotText;
+    @BindView(R.id.mwaura_text)
+    TextView mwauraText;
+    @BindView(R.id.kaluyu_text)
+    TextView kaluyuText;
+
+
+    @BindView(R.id.raila_total)
+    EditText railaTotal;
+    @BindView(R.id.aukot_total)
+    EditText aukotTotal;
+
+    @BindView(R.id.jirongo_total)
+    EditText jirongoTotal;
+    @BindView(R.id.nyagah_total)
+    EditText nyagahTotal;
+
+    @BindView(R.id.uhuru_total)
+    EditText uhuruTotal;
+    @BindView(R.id.dida_total)
+    EditText didaTotal;
+
+    @BindView(R.id.kaluyu_total)
+    EditText kaluyuTotal;
+    @BindView(R.id.mwaura_total)
+    EditText mwauraTotal;
+
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
     @BindView(R.id.constituency_spinner)
@@ -100,7 +135,7 @@ public class MainFragment extends Fragment {
     @BindView(R.id.image_name)
     TextView imageName;
 
-    String num1, num2;
+    String railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr;
 
     Bitmap bitmap;
 
@@ -112,7 +147,7 @@ public class MainFragment extends Fragment {
 
     String countyStr, constStr, wardStr, pollStStr = "";
 
-    Spinner seatSpinner;
+//    Spinner seatSpinner;
 
     String pollStId;
 
@@ -145,15 +180,37 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
-        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
+//        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
 
         locationsPreference = new LocationSharedPrefs(getActivity());
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
         if (pollStStr.isEmpty()) {
-            numInput1.setVisibility(View.GONE);
-            numInput2.setVisibility(View.GONE);
+            railaTotal.setVisibility(View.GONE);
+            railaText.setVisibility(View.GONE);
+
+            aukotTotal.setVisibility(View.GONE);
+            aukotText.setVisibility(View.GONE);
+
+            uhuruTotal.setVisibility(View.GONE);
+            uhuruText.setVisibility(View.GONE);
+
+            didaTotal.setVisibility(View.GONE);
+            didaText.setVisibility(View.GONE);
+
+            nyagahTotal.setVisibility(View.GONE);
+            nyagahText.setVisibility(View.GONE);
+
+            jirongoTotal.setVisibility(View.GONE);
+            jirongoText.setVisibility(View.GONE);
+
+            mwauraTotal.setVisibility(View.GONE);
+            mwauraText.setVisibility(View.GONE);
+
+            kaluyuTotal.setVisibility(View.GONE);
+            kaluyuText.setVisibility(View.GONE);
+
             buttonSubmit.setEnabled(false);
         }
 
@@ -214,8 +271,30 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = parent.getItemAtPosition(position).toString();
-                numInput1.setVisibility(View.VISIBLE);
-                numInput2.setVisibility(View.VISIBLE);
+                railaTotal.setVisibility(View.VISIBLE);
+                railaText.setVisibility(View.VISIBLE);
+
+                uhuruTotal.setVisibility(View.VISIBLE);
+                uhuruText.setVisibility(View.VISIBLE);
+
+                didaTotal.setVisibility(View.VISIBLE);
+                didaText.setVisibility(View.VISIBLE);
+
+                nyagahTotal.setVisibility(View.VISIBLE);
+                nyagahText.setVisibility(View.VISIBLE);
+
+                jirongoTotal.setVisibility(View.VISIBLE);
+                jirongoText.setVisibility(View.VISIBLE);
+
+                aukotTotal.setVisibility(View.VISIBLE);
+                aukotText.setVisibility(View.VISIBLE);
+
+                mwauraTotal.setVisibility(View.VISIBLE);
+                mwauraText.setVisibility(View.VISIBLE);
+
+                kaluyuTotal.setVisibility(View.VISIBLE);
+                kaluyuText.setVisibility(View.VISIBLE);
+
                 imageName.setVisibility(View.VISIBLE);
                 String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
                 imageName.setText(iD);
@@ -228,7 +307,7 @@ public class MainFragment extends Fragment {
             }
         });
 
-        numInput1.addTextChangedListener(new TextWatcher() {
+        railaTotal.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -237,8 +316,8 @@ public class MainFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() > 0) {
-                    num1 = s.toString();
-                    Log.d(LOG_TAG, num1);
+                    railaStr = s.toString();
+                    Log.d(LOG_TAG, railaStr);
                 }
             }
 
@@ -391,41 +470,51 @@ public class MainFragment extends Fragment {
 
     @OnClick(R.id.submit_button)
     void submitButton() {
-        num1 = numInput1.getText().toString();
-        num2 = numInput2.getText().toString();
-        if (!num1.isEmpty() && !num2.isEmpty()) {
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + num1 + "||" + num2);
-            if (seatSpinner != null) {
-                String seat = String.valueOf(seatSpinner.getSelectedItem());
-                if (pollStStr.equals("PollSt1")) {
-                    pollStId = "1";
-                } else if (pollStStr.equals("PollSt2")) {
-                    pollStId = "2";
-                } else {
-                    pollStId = "3";
-                }
+        railaStr = railaTotal.getText().toString();
+        uhuruStr = uhuruTotal.getText().toString();
+        didaStr = didaTotal.getText().toString();
+        nyagahStr = nyagahTotal.getText().toString();
+        jirongoStr = jirongoTotal.getText().toString();
+        aukotStr = aukotTotal.getText().toString();
+        mwauraStr = mwauraTotal.getText().toString();
+        kaluyuStr = kaluyuTotal.getText().toString();
 
-//                sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
-//                sqLiteHandler.addToTableTwo(pollStId, num1, num2, seat);
-                pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
-                pushToTableTwo(pollStId, num1, num2, seat);
-                uploadImageClient();
-                Log.d(LOG_TAG, " Seat Spinner val: " + seat);
-                Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-            } else {
-                Log.d(LOG_TAG, "Seat spinner is null");
-            }
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !didaStr.isEmpty() && !nyagahStr.isEmpty() && !jirongoStr.isEmpty() && !aukotStr.isEmpty()
+                && !mwauraStr.isEmpty() && !kaluyuStr.isEmpty()) {
+            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + didaStr);
+//            String seat = String.valueOf(seatSpinner.getSelectedItem());
+            String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
+
+//          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
+//          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
+            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
+            pushToTableTwo(iD, railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr);
+            uploadImageClient(iD);
+//            Log.d(LOG_TAG, " Seat Spinner val: " + seat);
+//            Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
         } else {
-            numInput1.setError("Please fill in this field");
-            numInput2.setError("Please fill in this field");
+            railaTotal.setError("Please fill in this field");
+            uhuruTotal.setError("Please fill in this field");
+            didaTotal.setError("Please fill in this field");
+            nyagahTotal.setError("Please fill in this field");
+            jirongoTotal.setError("Please fill in this field");
+            aukotTotal.setError("Please fill in this field");
+            mwauraTotal.setError("Please fill in this field");
+            kaluyuTotal.setError("Please fill in this field");
         }
 
         edCounty.setText("");
         edConstituency.setText("");
         edWard.setText("");
         edPollStation.setText("");
-        numInput1.setText("");
-        numInput2.setText("");
+        railaTotal.setText("");
+        uhuruTotal.setText("");
+        didaTotal.setText("");
+        nyagahTotal.setText("");
+        jirongoTotal.setText("");
+        mwauraTotal.setText("");
+        kaluyuTotal.setText("");
+        aukotTotal.setText("");
         imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
@@ -602,7 +691,12 @@ public class MainFragment extends Fragment {
     @OnClick(R.id.imageview_container)
     void imageViewContainer() {
         position = 1;
-        startChooser();
+        if (pollStStr.isEmpty()) {
+            Toast.makeText(getContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
+        } else {
+            startChooser();
+        }
+
     }
 
     @Override
@@ -635,7 +729,6 @@ public class MainFragment extends Fragment {
                         Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                         imageViewContainer.setImageBitmap(bitmap);
-
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -686,17 +779,22 @@ public class MainFragment extends Fragment {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] imageBytes = byteArrayOutputStream.toByteArray();
-        return "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
-    private void uploadImageClient() {
+    private void uploadImageClient(final String pollStId) {
+        final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
 //        progressBar.setVisibility(View.VISIBLE);
+        pDialog.setMessage("Uploading...");
+        showDialog();
         Log.d("Image upload", "started");
-        StringRequest request = new StringRequest(Request.Method.POST, "http://inovatec.co.ke/ts/upload.php",
+        StringRequest request = new StringRequest(Request.Method.POST, "http://inovatec.co.ke/ts/upload_image.php",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
                         Log.d("Upload image", s);
+                        pDialog.dismiss();
 //                        progressBar.setVisibility(View.GONE);
 //                        try {
 //                            JSONObject jsonObject = new JSONObject(s);
@@ -721,6 +819,7 @@ public class MainFragment extends Fragment {
 //                progressBar.setVisibility(View.GONE);
 //                Log.d("Upliad error", volleyError.getMessage());
 //                finish();
+                hideDialog();
             }
         }) {
             @Override
@@ -729,7 +828,7 @@ public class MainFragment extends Fragment {
 
                 Map<String, String> params = new HashMap<>();
                 params.put("image", image);
-                params.put("name", "66787");
+                params.put("name", pollStId + "_" + timeStamp);
                 return params;
             }
         };
@@ -767,7 +866,8 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTableTwo(final String pollStId, final String num1, final String num2, final String seat) {
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String didaStr,
+                                final String nyagahStr, final String jirongoStr, final String aukotStr, final String mwauraStr, final String kaluyuStr) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -785,9 +885,14 @@ public class MainFragment extends Fragment {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("poll_station_id", pollStId);
-                params.put("column_a", num1);
-                params.put("column_b", num2);
-                params.put("seat", seat);
+                params.put("raila", railaStr);
+                params.put("uhuru", uhuruStr);
+                params.put("dida", didaStr);
+                params.put("nyagah", nyagahStr);
+                params.put("jirongo", jirongoStr);
+                params.put("aukot", aukotStr);
+                params.put("mwaura", mwauraStr);
+                params.put("kaluyu", kaluyuStr);
 
                 return params;
             }
@@ -890,6 +995,17 @@ public class MainFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         parentActivity = activity;
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+        pDialog.setCancelable(true);
+    }
+
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 
 
