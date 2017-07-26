@@ -357,7 +357,6 @@ public final class CropImage {
         mediaFile = new File(mediaStorageDir.getPath() + File.separator
                 + "IMG_" + timeStamp + ".jpg");
 
-        Log.d("Looooooollllll", "YYYYASDSDSDNSDN");
 
         return mediaFile;
     }

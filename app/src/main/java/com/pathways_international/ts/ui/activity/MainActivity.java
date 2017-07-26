@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.seat_spinner)
-    Spinner seatSpinner;
+    //    @BindView(R.id.seat_spinner)
+//    Spinner seatSpinner;
     SQLiteHandler sqLiteHandler;
     private ProgressDialog pDialog;
 
@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setCustomView(R.layout.actionbar_spinner);
-            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
-        }
-        ButterKnife.bind(this);
+//        final ActionBar actionBar = getSupportActionBar();
+//        if (actionBar != null) {
+//            actionBar.setCustomView(R.layout.actionbar_spinner);
+//            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
+//        }
+//        ButterKnife.bind(this);
 //        if (sqLiteHandler.getRowCount() <= 0) {
 //            sampleQuery();
 //        }

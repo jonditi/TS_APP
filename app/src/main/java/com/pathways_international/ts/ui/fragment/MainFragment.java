@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -48,10 +50,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -75,10 +85,45 @@ public class MainFragment extends Fragment {
     Button buttonSubmit;
     @BindView(R.id.imageview_container)
     ImageView imageViewContainer;
-    @BindView(R.id.num_input1)
-    EditText numInput1;
-    @BindView(R.id.num_input2)
-    EditText numInput2;
+
+    @BindView(R.id.raila_text)
+    TextView railaText;
+    @BindView(R.id.uhuru_text)
+    TextView uhuruText;
+    @BindView(R.id.dida_text)
+    TextView didaText;
+    @BindView(R.id.nyagah_text)
+    TextView nyagahText;
+    @BindView(R.id.jirongo_text)
+    TextView jirongoText;
+    @BindView(R.id.aukot_text)
+    TextView aukotText;
+    @BindView(R.id.mwaura_text)
+    TextView mwauraText;
+    @BindView(R.id.kaluyu_text)
+    TextView kaluyuText;
+
+
+    @BindView(R.id.raila_total)
+    EditText railaTotal;
+    @BindView(R.id.aukot_total)
+    EditText aukotTotal;
+
+    @BindView(R.id.jirongo_total)
+    EditText jirongoTotal;
+    @BindView(R.id.nyagah_total)
+    EditText nyagahTotal;
+
+    @BindView(R.id.uhuru_total)
+    EditText uhuruTotal;
+    @BindView(R.id.dida_total)
+    EditText didaTotal;
+
+    @BindView(R.id.kaluyu_total)
+    EditText kaluyuTotal;
+    @BindView(R.id.mwaura_total)
+    EditText mwauraTotal;
+
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
     @BindView(R.id.constituency_spinner)
@@ -87,8 +132,10 @@ public class MainFragment extends Fragment {
     Spinner wardSpinner;
     @BindView(R.id.poll_spinner)
     Spinner pollSpinner;
+    @BindView(R.id.image_name)
+    TextView imageName;
 
-    String num1, num2;
+    String railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr;
 
     Bitmap bitmap;
 
@@ -100,7 +147,7 @@ public class MainFragment extends Fragment {
 
     String countyStr, constStr, wardStr, pollStStr = "";
 
-    Spinner seatSpinner;
+//    Spinner seatSpinner;
 
     String pollStId;
 
@@ -133,15 +180,37 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
-        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
+//        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
 
         locationsPreference = new LocationSharedPrefs(getActivity());
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
         if (pollStStr.isEmpty()) {
-            numInput1.setVisibility(View.GONE);
-            numInput2.setVisibility(View.GONE);
+            railaTotal.setVisibility(View.GONE);
+            railaText.setVisibility(View.GONE);
+
+            aukotTotal.setVisibility(View.GONE);
+            aukotText.setVisibility(View.GONE);
+
+            uhuruTotal.setVisibility(View.GONE);
+            uhuruText.setVisibility(View.GONE);
+
+            didaTotal.setVisibility(View.GONE);
+            didaText.setVisibility(View.GONE);
+
+            nyagahTotal.setVisibility(View.GONE);
+            nyagahText.setVisibility(View.GONE);
+
+            jirongoTotal.setVisibility(View.GONE);
+            jirongoText.setVisibility(View.GONE);
+
+            mwauraTotal.setVisibility(View.GONE);
+            mwauraText.setVisibility(View.GONE);
+
+            kaluyuTotal.setVisibility(View.GONE);
+            kaluyuText.setVisibility(View.GONE);
+
             buttonSubmit.setEnabled(false);
         }
 
@@ -202,8 +271,33 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = parent.getItemAtPosition(position).toString();
-                numInput1.setVisibility(View.VISIBLE);
-                numInput2.setVisibility(View.VISIBLE);
+                railaTotal.setVisibility(View.VISIBLE);
+                railaText.setVisibility(View.VISIBLE);
+
+                uhuruTotal.setVisibility(View.VISIBLE);
+                uhuruText.setVisibility(View.VISIBLE);
+
+                didaTotal.setVisibility(View.VISIBLE);
+                didaText.setVisibility(View.VISIBLE);
+
+                nyagahTotal.setVisibility(View.VISIBLE);
+                nyagahText.setVisibility(View.VISIBLE);
+
+                jirongoTotal.setVisibility(View.VISIBLE);
+                jirongoText.setVisibility(View.VISIBLE);
+
+                aukotTotal.setVisibility(View.VISIBLE);
+                aukotText.setVisibility(View.VISIBLE);
+
+                mwauraTotal.setVisibility(View.VISIBLE);
+                mwauraText.setVisibility(View.VISIBLE);
+
+                kaluyuTotal.setVisibility(View.VISIBLE);
+                kaluyuText.setVisibility(View.VISIBLE);
+
+//                imageName.setVisibility(View.VISIBLE);
+                String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
+                imageName.setText(iD);
                 buttonSubmit.setEnabled(true);
             }
 
@@ -213,7 +307,7 @@ public class MainFragment extends Fragment {
             }
         });
 
-        numInput1.addTextChangedListener(new TextWatcher() {
+        railaTotal.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -222,8 +316,8 @@ public class MainFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() > 0) {
-                    num1 = s.toString();
-                    Log.d(LOG_TAG, num1);
+                    railaStr = s.toString();
+                    Log.d(LOG_TAG, railaStr);
                 }
             }
 
@@ -337,6 +431,10 @@ public class MainFragment extends Fragment {
                 pDialog.dismiss();
                 if (pollStationList.size() > 0) {
                     pollStationList.clear();
+
+                }
+                if (pollStationId.size() > 0) {
+                    pollStationId.clear();
                 }
                 try {
                     JSONObject jsonObject = new JSONObject(response);
@@ -372,35 +470,51 @@ public class MainFragment extends Fragment {
 
     @OnClick(R.id.submit_button)
     void submitButton() {
-        num1 = numInput1.getText().toString();
-        num2 = numInput2.getText().toString();
-        if (!num1.isEmpty() && !num2.isEmpty()) {
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + num1 + "||" + num2);
-            if (seatSpinner != null) {
-                String seat = String.valueOf(seatSpinner.getSelectedItem());
-                if (pollStStr.equals("PollSt1")) {
-                    pollStId = "1";
-                } else if (pollStStr.equals("PollSt2")) {
-                    pollStId = "2";
-                }
-                sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
-                sqLiteHandler.addToTableTwo(pollStId, num1, num2, seat);
-                Log.d(LOG_TAG, " Seat Spinner val: " + seat);
-                Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-            } else {
-                Log.d(LOG_TAG, "Seat spinner is null");
-            }
+        railaStr = railaTotal.getText().toString();
+        uhuruStr = uhuruTotal.getText().toString();
+        didaStr = didaTotal.getText().toString();
+        nyagahStr = nyagahTotal.getText().toString();
+        jirongoStr = jirongoTotal.getText().toString();
+        aukotStr = aukotTotal.getText().toString();
+        mwauraStr = mwauraTotal.getText().toString();
+        kaluyuStr = kaluyuTotal.getText().toString();
+
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !didaStr.isEmpty() && !nyagahStr.isEmpty() && !jirongoStr.isEmpty() && !aukotStr.isEmpty()
+                && !mwauraStr.isEmpty() && !kaluyuStr.isEmpty()) {
+            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + didaStr);
+//            String seat = String.valueOf(seatSpinner.getSelectedItem());
+            String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
+
+//          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
+//          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
+            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
+            pushToTableTwo(iD, railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr);
+            uploadImageClient(iD);
+//            Log.d(LOG_TAG, " Seat Spinner val: " + seat);
+//            Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
         } else {
-            numInput1.setError("Please fill in this field");
-            numInput2.setError("Please fill in this field");
+            railaTotal.setError("Please fill in this field");
+            uhuruTotal.setError("Please fill in this field");
+            didaTotal.setError("Please fill in this field");
+            nyagahTotal.setError("Please fill in this field");
+            jirongoTotal.setError("Please fill in this field");
+            aukotTotal.setError("Please fill in this field");
+            mwauraTotal.setError("Please fill in this field");
+            kaluyuTotal.setError("Please fill in this field");
         }
 
         edCounty.setText("");
         edConstituency.setText("");
         edWard.setText("");
         edPollStation.setText("");
-        numInput1.setText("");
-        numInput2.setText("");
+        railaTotal.setText("");
+        uhuruTotal.setText("");
+        didaTotal.setText("");
+        nyagahTotal.setText("");
+        jirongoTotal.setText("");
+        mwauraTotal.setText("");
+        kaluyuTotal.setText("");
+        aukotTotal.setText("");
         imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
@@ -577,7 +691,12 @@ public class MainFragment extends Fragment {
     @OnClick(R.id.imageview_container)
     void imageViewContainer() {
         position = 1;
-        startChooser();
+        if (pollStStr.isEmpty()) {
+            Toast.makeText(getContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
+        } else {
+            startChooser();
+        }
+
     }
 
     @Override
@@ -607,9 +726,9 @@ public class MainFragment extends Fragment {
                 if (position == 1) {
 //                    imageViewContainer.setImageURI(imageUri);
                     try {
+                        Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                         imageViewContainer.setImageBitmap(bitmap);
-//                        uploadImageClient();
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -628,38 +747,72 @@ public class MainFragment extends Fragment {
         });
     }
 
+    private static File getOutputMediaFile() {
+
+
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                CropImage.IMAGE_DIRECTORY_NAME);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("LOOOOOD", "Oops! Failed create "
+                        + CropImage.IMAGE_DIRECTORY_NAME + " directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + ".jpg");
+
+        return mediaFile;
+    }
+
     public String getStringImage(Bitmap bmp) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] imageBytes = byteArrayOutputStream.toByteArray();
-        return "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
-    private void uploadImageClient() {
+    private void uploadImageClient(final String pollStId) {
+        final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
 //        progressBar.setVisibility(View.VISIBLE);
+        pDialog.setMessage("Uploading...");
+        showDialog();
         Log.d("Image upload", "started");
-        StringRequest request = new StringRequest(Request.Method.POST, "https://fundilistapp.com/api/v1/client_avatar",
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.UPLOAD_IMAGE,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
                         Log.d("Upload image", s);
+                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
+                        pDialog.dismiss();
 //                        progressBar.setVisibility(View.GONE);
-                        try {
-                            JSONObject jsonObject = new JSONObject(s);
-                            boolean error = jsonObject.getBoolean("error");
-                            if (!error) {
-                                String avatarUrl = jsonObject.getString("avatar");
-
-                                Log.d("CLIENT PROFILE PIC", avatarUrl);
-
-                                Log.d("Edit Profile Response", "Success");
-//                                locationSharedPrefs.setAvatarUrl(avatarUrl);
-//                                finish();
-
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            JSONObject jsonObject = new JSONObject(s);
+//                            boolean error = jsonObject.getBoolean("error");
+//                            if (!error) {
+//                                String avatarUrl = jsonObject.getString("avatar");
+//
+//                                Log.d("CLIENT PROFILE PIC", avatarUrl);
+//
+//                                Log.d("Edit Profile Response", "Success");
+////                                locationSharedPrefs.setAvatarUrl(avatarUrl);
+////                                finish();
+//
+//                            }
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -667,6 +820,7 @@ public class MainFragment extends Fragment {
 //                progressBar.setVisibility(View.GONE);
 //                Log.d("Upliad error", volleyError.getMessage());
 //                finish();
+                hideDialog();
             }
         }) {
             @Override
@@ -674,14 +828,132 @@ public class MainFragment extends Fragment {
                 String image = getStringImage(bitmap);
 
                 Map<String, String> params = new HashMap<>();
-                params.put("client_id", "90");
                 params.put("image", image);
+                params.put("name", pollStId + "_" + timeStamp);
+                params.put("poll_station_id", pollStId);
                 return params;
             }
         };
 
         AppController.getInstance().addToRequestQueue(request);
 
+    }
+
+    private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABELE_ONE, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("Server Response", response);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Server Response", error.toString());
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("county", countyStr);
+                params.put("constituency", constStr);
+                params.put("ward", wardStr);
+                params.put("poll_station", pollStStr);
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String didaStr,
+                                final String nyagahStr, final String jirongoStr, final String aukotStr, final String mwauraStr, final String kaluyuStr) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("Server Response", response);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Server Response", error.toString());
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("poll_station_id", pollStId);
+                params.put("raila", railaStr);
+                params.put("uhuru", uhuruStr);
+                params.put("dida", didaStr);
+                params.put("nyagah", nyagahStr);
+                params.put("jirongo", jirongoStr);
+                params.put("aukot", aukotStr);
+                params.put("mwaura", mwauraStr);
+                params.put("kaluyu", kaluyuStr);
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
+
+    }
+
+    private File saveImageToExternal(Uri imageUri, String pollStId) {
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                CropImage.IMAGE_DIRECTORY_NAME);
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("LOOOOOD", "Oops! Failed create "
+                        + CropImage.IMAGE_DIRECTORY_NAME + " directory");
+
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + pollStId + "_" + timeStamp + ".jpg");
+
+        final int chunkSize = 1024;  // We'll read in one kB at a time
+        byte[] imageData = new byte[chunkSize];
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = getContext().getContentResolver().openInputStream(imageUri);
+            out = new FileOutputStream(mediaFile);  // I'm assuming you already have the File object for where you're writing to
+
+            int bytesRead;
+            while ((bytesRead = in.read(imageData)) > 0) {
+                out.write(Arrays.copyOfRange(imageData, 0, Math.max(0, bytesRead)));
+            }
+
+        } catch (Exception ex) {
+            Log.e("Something went wrong.", ex.toString());
+        } finally {
+            try {
+                assert in != null;
+                in.close();
+                assert out != null;
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return mediaFile;
     }
 
     @Override
@@ -725,6 +997,17 @@ public class MainFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         parentActivity = activity;
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+        pDialog.setCancelable(true);
+    }
+
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 
 

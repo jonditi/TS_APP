@@ -6,11 +6,11 @@
     <!-- Elective seats array -->
     <string-array name="seat">
         <item>President</item>
-        <item>Governor</item>
-        <item>Senator</item>
-        <item>MP</item>
-        <item>Women Rep</item>
-        <item>MCA</item>
+        <!--<item>Governor</item>-->
+        <!--<item>Senator</item>-->
+        <!--<item>MP</item>-->
+        <!--<item>Women Rep</item>-->
+        <!--<item>MCA</item>-->
     </string-array>
 
     <!-- Counties array -->
