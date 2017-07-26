@@ -295,7 +295,7 @@ public class MainFragment extends Fragment {
                 kaluyuTotal.setVisibility(View.VISIBLE);
                 kaluyuText.setVisibility(View.VISIBLE);
 
-                imageName.setVisibility(View.VISIBLE);
+//                imageName.setVisibility(View.VISIBLE);
                 String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
                 imageName.setText(iD);
                 buttonSubmit.setEnabled(true);
@@ -789,7 +789,7 @@ public class MainFragment extends Fragment {
         pDialog.setMessage("Uploading...");
         showDialog();
         Log.d("Image upload", "started");
-        StringRequest request = new StringRequest(Request.Method.POST, "http://inovatec.co.ke/ts/upload_image.php",
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.UPLOAD_IMAGE,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -829,6 +829,7 @@ public class MainFragment extends Fragment {
                 Map<String, String> params = new HashMap<>();
                 params.put("image", image);
                 params.put("name", pollStId + "_" + timeStamp);
+                params.put("poll_station_id", pollStId);
                 return params;
             }
         };
