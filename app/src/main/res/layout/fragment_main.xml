@@ -16,12 +16,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/imageview_container"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_camera" />
 
             <TextView
                 android:id="@+id/image_name"
@@ -133,6 +127,15 @@
                 android:hint="Polling Station"
                 android:padding="10dp"
                 android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/imageview_container"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_camera"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp" />
 
             <include layout="@layout/checkboxes" />
 
