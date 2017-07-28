@@ -24,6 +24,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -135,6 +136,9 @@ public class MainFragment extends Fragment {
     @BindView(R.id.image_name)
     TextView imageName;
 
+    @BindView(R.id.candidates_view)
+    RelativeLayout candidatesView;
+
     String railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr;
 
     Bitmap bitmap;
@@ -187,30 +191,7 @@ public class MainFragment extends Fragment {
         pDialog.setCancelable(false);
 
         if (pollStStr.isEmpty()) {
-            railaTotal.setVisibility(View.GONE);
-            railaText.setVisibility(View.GONE);
-
-            aukotTotal.setVisibility(View.GONE);
-            aukotText.setVisibility(View.GONE);
-
-            uhuruTotal.setVisibility(View.GONE);
-            uhuruText.setVisibility(View.GONE);
-
-            didaTotal.setVisibility(View.GONE);
-            didaText.setVisibility(View.GONE);
-
-            nyagahTotal.setVisibility(View.GONE);
-            nyagahText.setVisibility(View.GONE);
-
-            jirongoTotal.setVisibility(View.GONE);
-            jirongoText.setVisibility(View.GONE);
-
-            mwauraTotal.setVisibility(View.GONE);
-            mwauraText.setVisibility(View.GONE);
-
-            kaluyuTotal.setVisibility(View.GONE);
-            kaluyuText.setVisibility(View.GONE);
-
+            candidatesView.setVisibility(View.GONE);
             buttonSubmit.setEnabled(false);
         }
 
@@ -271,31 +252,11 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = parent.getItemAtPosition(position).toString();
-                railaTotal.setVisibility(View.VISIBLE);
-                railaText.setVisibility(View.VISIBLE);
 
-                uhuruTotal.setVisibility(View.VISIBLE);
-                uhuruText.setVisibility(View.VISIBLE);
+                if (candidatesView.getVisibility() == View.GONE) {
+                    candidatesView.setVisibility(View.VISIBLE);
+                }
 
-                didaTotal.setVisibility(View.VISIBLE);
-                didaText.setVisibility(View.VISIBLE);
-
-                nyagahTotal.setVisibility(View.VISIBLE);
-                nyagahText.setVisibility(View.VISIBLE);
-
-                jirongoTotal.setVisibility(View.VISIBLE);
-                jirongoText.setVisibility(View.VISIBLE);
-
-                aukotTotal.setVisibility(View.VISIBLE);
-                aukotText.setVisibility(View.VISIBLE);
-
-                mwauraTotal.setVisibility(View.VISIBLE);
-                mwauraText.setVisibility(View.VISIBLE);
-
-                kaluyuTotal.setVisibility(View.VISIBLE);
-                kaluyuText.setVisibility(View.VISIBLE);
-
-//                imageName.setVisibility(View.VISIBLE);
                 String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
                 imageName.setText(iD);
                 buttonSubmit.setEnabled(true);
@@ -793,33 +754,14 @@ public class MainFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
+                        pDialog.dismiss();
                         Log.d("Upload image", s);
                         Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-                        pDialog.dismiss();
-//                        progressBar.setVisibility(View.GONE);
-//                        try {
-//                            JSONObject jsonObject = new JSONObject(s);
-//                            boolean error = jsonObject.getBoolean("error");
-//                            if (!error) {
-//                                String avatarUrl = jsonObject.getString("avatar");
-//
-//                                Log.d("CLIENT PROFILE PIC", avatarUrl);
-//
-//                                Log.d("Edit Profile Response", "Success");
-////                                locationSharedPrefs.setAvatarUrl(avatarUrl);
-////                                finish();
-//
-//                            }
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
+                        candidatesView.setVisibility(View.GONE);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-//                progressBar.setVisibility(View.GONE);
-//                Log.d("Upliad error", volleyError.getMessage());
-//                finish();
                 hideDialog();
             }
         }) {
