@@ -675,7 +675,7 @@ public class MainFragment extends Fragment {
     }
 
     private void startChooser() {
-        imagePicker.startCamera(this, new ImagePicker.Callback() {
+        imagePicker.startChooser(this, new ImagePicker.Callback() {
             @Override
             public void onPickImage(Uri imageUri) {
 

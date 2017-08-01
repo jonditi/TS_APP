@@ -29,12 +29,15 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 
+import com.pathways_international.ts.BuildConfig;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.activity.CropImageActivity;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -217,6 +220,7 @@ public final class CropImage {
             outputFileUri = getCaptureImageOutputUri(context);
         }
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+//        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         return intent;
     }
 
@@ -325,8 +329,30 @@ public final class CropImage {
         String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault()).format(new Date());
         if (getImage != null) {
             outputFileUri = Uri.fromFile(new File(getImage.getPath(), "pickImageResult.jpeg"));
+
+            // Uncomment below if you wish to use {@link ImagePicker.startCamera() method}
+            // Since Android N requires the path to be of content:// schema instead of file://
+//            outputFileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", getOutputMediaFile());
         }
+
         return outputFileUri;
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "Camera");
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        String mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     /**
