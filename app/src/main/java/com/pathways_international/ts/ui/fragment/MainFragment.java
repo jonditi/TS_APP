@@ -105,6 +105,8 @@ public class MainFragment extends Fragment {
     Spinner wardSpinner;
     @BindView(R.id.poll_spinner)
     Spinner pollSpinner;
+    @BindView(R.id.stream_spinner)
+    Spinner streamSpinner;
     @BindView(R.id.image_name)
     TextView imageName;
 
@@ -121,19 +123,21 @@ public class MainFragment extends Fragment {
     private SQLiteHandler sqLiteHandler;
 
 
-    String countyStr, constStr, wardStr, pollStStr = "";
+    String countyStr, constStr, wardStr, streamStr = "";
+    String pollStStr = "";
 
 //    Spinner seatSpinner;
 
     String pollStId;
 
-    ArrayAdapter<String> countyAdapter, constAdapter, wardAdapter, pollAdapter;
+    ArrayAdapter<String> countyAdapter, constAdapter, wardAdapter, pollAdapter, pollStreamAdapter;
     LocationSharedPrefs locationsPreference;
     List<LocationModel> countyModelList = new ArrayList<>();
     List<LocationModel> locationModelList = new ArrayList<>();
     ArrayList<String> cosntituencies = new ArrayList<>();
     ArrayList<String> wardsList = new ArrayList<>();
     ArrayList<String> pollStationList = new ArrayList<>();
+    ArrayList<String> pollStationStreamList = new ArrayList<>();
     ArrayList<String> pollStationId = new ArrayList<>();
     Boolean requestedStarted = false;
 
@@ -224,6 +228,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = parent.getItemAtPosition(position).toString();
+                loadPollStreamsRemote(pollStStr);
 
                 if (candidatesView.getVisibility() == View.GONE) {
                     candidatesView.setVisibility(View.VISIBLE);
@@ -232,6 +237,18 @@ public class MainFragment extends Fragment {
                 String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
                 imageName.setText(iD);
                 buttonSubmit.setEnabled(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        streamSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                streamStr = parent.getItemAtPosition(position).toString();
             }
 
             @Override
@@ -377,14 +394,60 @@ public class MainFragment extends Fragment {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String ward = obj.getString("poll_station");
                             String id = obj.getString("id");
-                            pollStationId.add(id);
-                            pollStationList.add(ward);
+                            if (!pollStationList.contains(ward)) {
+                                pollStationId.add(id);
+                                pollStationList.add(ward);
+                            }
+
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
                         pollAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, pollStationList);
                         pollSpinner.setAdapter(pollAdapter);
                         pollSpinner.setVisibility(View.VISIBLE);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                pDialog.dismiss();
+            }
+        });
+
+        AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void loadPollStreamsRemote(String pollStStr) {
+        pDialog.setMessage("Loading streams stations");
+        pDialog.dismiss();
+        pollStStr = pollStStr.replace(" ", "%20");
+        Log.d(LOG_TAG, pollStStr);
+        StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STREAM + pollStStr, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                pDialog.dismiss();
+                Log.d("Streams", response);
+                if (pollStationStreamList.size() > 0) {
+                    pollStationStreamList.clear();
+
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    JSONArray jsonArray = jsonObject.getJSONArray("location");
+                    if (jsonArray.length() > 0) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            String stream = obj.getString("stream");
+                            pollStationStreamList.add(stream);
+                        }
+
+                        Log.d(LOG_TAG, "" + pollStationId.size());
+                        pollStreamAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, pollStationStreamList);
+                        streamSpinner.setAdapter(pollStreamAdapter);
+                        streamSpinner.setVisibility(View.VISIBLE);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -415,7 +478,7 @@ public class MainFragment extends Fragment {
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
+            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr, streamStr);
             pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr);
             uploadImageClient(iD);
         } else {
@@ -749,7 +812,8 @@ public class MainFragment extends Fragment {
 
     }
 
-    private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr) {
+    private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
+                                 final String streamStr) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABELE_ONE, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -770,6 +834,7 @@ public class MainFragment extends Fragment {
                 params.put("constituency", constStr);
                 params.put("ward", wardStr);
                 params.put("poll_station", pollStStr);
+                params.put("stream", streamStr);
 
                 return params;
             }

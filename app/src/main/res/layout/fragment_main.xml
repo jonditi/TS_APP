@@ -96,6 +96,20 @@
                 android:layout_height="wrap_content"
                 android:visibility="invisible" />
 
+            <TextView
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stream" />
+
+
+            <Spinner
+                android:padding="8dp"
+                android:id="@+id/stream_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+
             <AutoCompleteTextView
                 android:id="@+id/county"
                 android:layout_width="match_parent"
