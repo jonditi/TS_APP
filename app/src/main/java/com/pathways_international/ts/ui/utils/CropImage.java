@@ -280,7 +280,7 @@ public final class CropImage {
     }
 
     /**
-     * Check if explicetly requesting camera permission is required.<br>
+     * Check if explicitly requesting camera permission is required.<br>
      * It is required in Android Marshmellow and above if "CAMERA" permission is requested in the manifest.<br>
      * See <a href="http://stackoverflow.com/questions/32789027/android-m-camera-intent-permission-bug">StackOverflow
      * question</a>.

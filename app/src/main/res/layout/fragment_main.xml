@@ -43,33 +43,39 @@
 
 
             <TextView
+                android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="County" />
 
             <Spinner
+                android:padding="8dp"
                 android:id="@+id/county_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:entries="@array/counties" />
 
             <TextView
+                android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Constituency" />
 
             <Spinner
+                android:padding="8dp"
                 android:id="@+id/constituency_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="invisible" />
 
             <TextView
+                android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ward" />
 
             <Spinner
+                android:padding="8dp"
                 android:id="@+id/ward_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -77,12 +83,14 @@
 
 
             <TextView
+                android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PollStation" />
 
 
             <Spinner
+                android:padding="8dp"
                 android:id="@+id/poll_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -146,7 +154,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="20dp"
-                android:background="@color/colorPrimary"
+                android:background="@drawable/btn_bac"
                 android:clickable="true"
                 android:text="@string/submit"
                 android:textColor="#fff"

@@ -24,6 +24,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -87,43 +88,14 @@ public class MainFragment extends Fragment {
     @BindView(R.id.imageview_container)
     ImageView imageViewContainer;
 
-    @BindView(R.id.raila_text)
-    TextView railaText;
-    @BindView(R.id.uhuru_text)
-    TextView uhuruText;
-    @BindView(R.id.dida_text)
-    TextView didaText;
-    @BindView(R.id.nyagah_text)
-    TextView nyagahText;
-    @BindView(R.id.jirongo_text)
-    TextView jirongoText;
-    @BindView(R.id.aukot_text)
-    TextView aukotText;
-    @BindView(R.id.mwaura_text)
-    TextView mwauraText;
-    @BindView(R.id.kaluyu_text)
-    TextView kaluyuText;
-
-
     @BindView(R.id.raila_total)
     EditText railaTotal;
-    @BindView(R.id.aukot_total)
-    EditText aukotTotal;
 
-    @BindView(R.id.jirongo_total)
-    EditText jirongoTotal;
-    @BindView(R.id.nyagah_total)
-    EditText nyagahTotal;
 
     @BindView(R.id.uhuru_total)
     EditText uhuruTotal;
-    @BindView(R.id.dida_total)
-    EditText didaTotal;
-
-    @BindView(R.id.kaluyu_total)
-    EditText kaluyuTotal;
-    @BindView(R.id.mwaura_total)
-    EditText mwauraTotal;
+    @BindView(R.id.spoilt_votes)
+    EditText spoiltVotes;
 
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
@@ -137,9 +109,9 @@ public class MainFragment extends Fragment {
     TextView imageName;
 
     @BindView(R.id.candidates_view)
-    RelativeLayout candidatesView;
+    LinearLayout candidatesView;
 
-    String railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr;
+    String railaStr, uhuruStr, spoiltVotesStr;
 
     Bitmap bitmap;
 
@@ -268,25 +240,25 @@ public class MainFragment extends Fragment {
             }
         });
 
-        railaTotal.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().length() > 0) {
-                    railaStr = s.toString();
-                    Log.d(LOG_TAG, railaStr);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+//        railaTotal.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (s.toString().trim().length() > 0) {
+//                    railaStr = s.toString();
+//                    Log.d(LOG_TAG, railaStr);
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
 
 
         imagePicker.setCropImage(true);
@@ -433,49 +405,35 @@ public class MainFragment extends Fragment {
     void submitButton() {
         railaStr = railaTotal.getText().toString();
         uhuruStr = uhuruTotal.getText().toString();
-        didaStr = didaTotal.getText().toString();
-        nyagahStr = nyagahTotal.getText().toString();
-        jirongoStr = jirongoTotal.getText().toString();
-        aukotStr = aukotTotal.getText().toString();
-        mwauraStr = mwauraTotal.getText().toString();
-        kaluyuStr = kaluyuTotal.getText().toString();
+        spoiltVotesStr = spoiltVotes.getText().toString();
 
-        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !didaStr.isEmpty() && !nyagahStr.isEmpty() && !jirongoStr.isEmpty() && !aukotStr.isEmpty()
-                && !mwauraStr.isEmpty() && !kaluyuStr.isEmpty()) {
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + didaStr);
-//            String seat = String.valueOf(seatSpinner.getSelectedItem());
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty()) {
+            buttonSubmit.setEnabled(false);
+            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
+
             String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
             pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
-            pushToTableTwo(iD, railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr);
+            pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr);
             uploadImageClient(iD);
-//            Log.d(LOG_TAG, " Seat Spinner val: " + seat);
-//            Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
         } else {
             railaTotal.setError("Please fill in this field");
             uhuruTotal.setError("Please fill in this field");
-            didaTotal.setError("Please fill in this field");
-            nyagahTotal.setError("Please fill in this field");
-            jirongoTotal.setError("Please fill in this field");
-            aukotTotal.setError("Please fill in this field");
-            mwauraTotal.setError("Please fill in this field");
-            kaluyuTotal.setError("Please fill in this field");
+            spoiltVotes.setError("Please fill in this field");
         }
 
         edCounty.setText("");
         edConstituency.setText("");
+
         edWard.setText("");
         edPollStation.setText("");
+
         railaTotal.setText("");
         uhuruTotal.setText("");
-        didaTotal.setText("");
-        nyagahTotal.setText("");
-        jirongoTotal.setText("");
-        mwauraTotal.setText("");
-        kaluyuTotal.setText("");
-        aukotTotal.setText("");
+
+        spoiltVotes.setText("");
         imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
@@ -755,14 +713,24 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onResponse(String s) {
                         pDialog.dismiss();
+                        buttonSubmit.setEnabled(true);
                         Log.d("Upload image", s);
                         Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //TODO: show popup instead of toast.
+                                }
+                            });
+                        }
                         candidatesView.setVisibility(View.GONE);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 hideDialog();
+                buttonSubmit.setEnabled(true);
             }
         }) {
             @Override
@@ -810,8 +778,7 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String didaStr,
-                                final String nyagahStr, final String jirongoStr, final String aukotStr, final String mwauraStr, final String kaluyuStr) {
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -831,13 +798,7 @@ public class MainFragment extends Fragment {
                 params.put("poll_station_id", pollStId);
                 params.put("raila", railaStr);
                 params.put("uhuru", uhuruStr);
-                params.put("dida", didaStr);
-                params.put("nyagah", nyagahStr);
-                params.put("jirongo", jirongoStr);
-                params.put("aukot", aukotStr);
-                params.put("mwaura", mwauraStr);
-                params.put("kaluyu", kaluyuStr);
-
+                params.put("spoilt_votes", spoiltVotesStr);
                 return params;
             }
         };
