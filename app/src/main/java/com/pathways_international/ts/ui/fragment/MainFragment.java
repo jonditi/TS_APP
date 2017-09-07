@@ -2,7 +2,9 @@ package com.pathways_international.ts.ui.fragment;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,6 +13,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
@@ -166,7 +169,7 @@ public class MainFragment extends Fragment {
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
-        if (pollStStr.isEmpty()) {
+        if (bitmap == null) {
             candidatesView.setVisibility(View.GONE);
             buttonSubmit.setEnabled(false);
         }
@@ -230,13 +233,6 @@ public class MainFragment extends Fragment {
                 pollStStr = parent.getItemAtPosition(position).toString();
                 loadPollStreamsRemote(pollStStr);
 
-                if (candidatesView.getVisibility() == View.GONE) {
-                    candidatesView.setVisibility(View.VISIBLE);
-                }
-
-                String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
-                imageName.setText(iD);
-                buttonSubmit.setEnabled(true);
             }
 
             @Override
@@ -249,6 +245,9 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 streamStr = parent.getItemAtPosition(position).toString();
+                String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+
+                imageName.setText(iD);
             }
 
             @Override
@@ -383,9 +382,9 @@ public class MainFragment extends Fragment {
                     pollStationList.clear();
 
                 }
-                if (pollStationId.size() > 0) {
-                    pollStationId.clear();
-                }
+//                if (pollStationId.size() > 0) {
+//                    pollStationId.clear();
+//                }
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray jsonArray = jsonObject.getJSONArray("location");
@@ -395,7 +394,7 @@ public class MainFragment extends Fragment {
                             String ward = obj.getString("poll_station");
                             String id = obj.getString("id");
                             if (!pollStationList.contains(ward)) {
-                                pollStationId.add(id);
+//                                pollStationId.add(id);
                                 pollStationList.add(ward);
                             }
 
@@ -434,14 +433,27 @@ public class MainFragment extends Fragment {
                     pollStationStreamList.clear();
 
                 }
+                if (pollStationId.size() > 0) {
+                    pollStationId.clear();
+                }
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray jsonArray = jsonObject.getJSONArray("location");
                     if (jsonArray.length() > 0) {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
+                            String ward = obj.getString("ward");
                             String stream = obj.getString("stream");
-                            pollStationStreamList.add(stream);
+                            String id = obj.getString("id");
+
+                            if (ward.equals(wardStr)) {
+                                pollStationStreamList.add(stream);
+
+                                pollStationId.add(id);
+                                Log.d(LOG_TAG, "Id added");
+                            }
+
+
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
@@ -474,7 +486,7 @@ public class MainFragment extends Fragment {
             buttonSubmit.setEnabled(false);
             Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
 
-            String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
+            String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
@@ -497,178 +509,13 @@ public class MainFragment extends Fragment {
         uhuruTotal.setText("");
 
         spoiltVotes.setText("");
+        candidatesView.setVisibility(View.GONE);
         imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
     }
 
-    private void loadCounties() {
-        List<String> countyList = sqLiteHandler.getCounties();
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
 
-        countySpinner.setAdapter(countyAdapter);
-
-    }
-
-    private void loadWards(String constituency) {
-        List<String> countyList = sqLiteHandler.getWards(constituency);
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
-
-        wardSpinner.setAdapter(countyAdapter);
-    }
-
-    private void loadPollStations(String ward) {
-        List<String> countyList = sqLiteHandler.getPollStations(ward);
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
-
-        pollSpinner.setAdapter(countyAdapter);
-    }
-
-    private void parseLocationData(String list, String variant) {
-        try {
-            JSONObject dataObject = new JSONObject(list);
-            JSONArray locationsArray = dataObject.getJSONArray("data");
-            for (int i = 0; i < locationsArray.length(); i++) {
-                JSONObject locationObject = locationsArray.getJSONObject(i);
-                LocationModel lm = new LocationModel();
-                if (variant.equals("county")) {
-                    lm.setCounty_id(locationObject.getString("county_id"));
-                    lm.setCounty_label(locationObject.getString("county_label"));
-                } else {
-                    lm.setLocation_id(locationObject.getString("location_id"));
-                    lm.setLocation_label(locationObject.getString("location_label"));
-                }
-                countyModelList.add(lm);
-                Log.d("location-listedssssss", locationObject.getString("county_label"));
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.d("location-list", e.toString());
-        }
-
-        CountyAutoCompleteAdapter regionAutoCompleteAdapter = new CountyAutoCompleteAdapter(parentActivity,
-                R.layout.autocomplete_row_item, countyModelList, variant);
-        edCounty.setAdapter(regionAutoCompleteAdapter);
-    }
-
-
-    private void sampleQuery() {
-        pDialog.setMessage("Fetching places data...");
-        pDialog.show();
-        Log.d(LOG_TAG, "Exceddd");
-        StringRequest request = new StringRequest(Request.Method.GET, "http://inovatec.co.ke/redwood/table10.php",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        pDialog.dismiss();
-                        Log.d(LOG_TAG, response);
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            JSONArray jsonArray = jsonObject.getJSONArray("location");
-                            Log.d(LOG_TAG, "" + jsonArray.length());
-                            if (jsonArray.length() > 0) {
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject obj = jsonArray.getJSONObject(i);
-                                    String id = obj.getString("id");
-                                    String county = obj.getString("county");
-                                    String constituency = obj.getString("constituency");
-                                    String ward = obj.getString("ward");
-                                    String pollStation = obj.getString("poll_st");
-
-                                    if (sqLiteHandler.getRowCount() < jsonArray.length()) {
-                                        sqLiteHandler.addToLoc(county, id, constituency, ward, pollStation);
-                                    }
-                                }
-                            }
-                            loadCounties();
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                pDialog.dismiss();
-            }
-        });
-
-        AppController.getInstance().addToRequestQueue(request);
-    }
-
-    public void locationsRequestVolley(final String url, final String variant) {
-        pDialog.setMessage("Loading places");
-        pDialog.show();
-        StringRequest request = new StringRequest(Request.Method.GET, getResources().getString(R.string.base_url) + url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        pDialog.dismiss();
-                        Log.d(LOG_TAG, s);
-                        Log.d("Bladdy", " hell");
-                        requestedStarted = false;
-                        if (variant.equals("places")) {
-                            if (locationsPreference.getConstituencyList().isEmpty()) {
-                                locationsPreference.setConstituencyList(s);
-                            }
-
-                            try {
-                                JSONObject dataObject = new JSONObject(s);
-                                JSONArray locationsArray = dataObject.getJSONArray("data");
-                                for (int i = 0; i < locationsArray.length(); i++) {
-                                    JSONObject locationObject = locationsArray.getJSONObject(i);
-                                    LocationModel lm = new LocationModel();
-
-                                    lm.setLocation_id(locationObject.getString("estate_id"));
-                                    lm.setLocation_label(locationObject.getString("estate_label"));
-                                    locationModelList.add(lm);
-
-
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Log.d("locatiion_req", e.toString());
-                            }
-                            ConstituencyAutoCompleteAdapter regionAutoCompleteAdapter = new ConstituencyAutoCompleteAdapter(parentActivity,
-                                    android.R.layout.simple_dropdown_item_1line, locationModelList, "location");
-//                            edConstituency.setAdapter(regionAutoCompleteAdapter);
-                            constituencySpinner.setAdapter(regionAutoCompleteAdapter);
-                            constituencySpinner.setVisibility(View.VISIBLE);
-
-
-//                            edConstituency.setVisibility(View.VISIBLE);
-//                            tvTitle.setVisibility(View.VISIBLE);
-
-                        } else {
-                            locationsPreference.setCountyList(s);
-                            parseLocationData(s, "county");
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.d("locatiion_req-e", volleyError.getMessage());
-                pDialog.dismiss();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                return super.getParams();
-            }
-        };
-
-        AppController.getInstance().addToRequestQueue(request);
-    }
 
     @OnClick(R.id.imageview_container)
     void imageViewContainer() {
@@ -711,6 +558,13 @@ public class MainFragment extends Fragment {
                         Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                         imageViewContainer.setImageBitmap(bitmap);
+                        if (bitmap != null) {
+                            if (candidatesView.getVisibility() == View.GONE) {
+                                candidatesView.setVisibility(View.VISIBLE);
+                            }
+                            buttonSubmit.setEnabled(true);
+
+                        }
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -779,21 +633,18 @@ public class MainFragment extends Fragment {
                         buttonSubmit.setEnabled(true);
                         Log.d("Upload image", s);
                         Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //TODO: show popup instead of toast.
-                                }
-                            });
-                        }
-                        candidatesView.setVisibility(View.GONE);
+                        // Clear the spinners
+                        wardSpinner.setAdapter(null);
+                        constituencySpinner.setAdapter(null);
+                        pollSpinner.setAdapter(null);
+                        streamSpinner.setAdapter(null);
+
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 hideDialog();
-                buttonSubmit.setEnabled(true);
+                buttonSubmit.setEnabled(false);
             }
         }) {
             @Override
