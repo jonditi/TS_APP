@@ -19,7 +19,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Database Name
     private static final String DATABASE_NAME = "top_secret";
@@ -30,6 +30,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     //  table two
     private static final String TABLE_TWO = "two";
+
+    // Login table name
+    private static final String TABLE_USER = "user";
 
     // loc table;
     private static final String TABLE_LOC = "location_all";
@@ -47,6 +50,12 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_NUM_ONE = "num_one";
     private static final String KEY_NUM_TWO = "num_two";
     private static final String KEY_SEAT = "seat";
+
+    // Login Table Columns names
+    private static final String KEY_NAME = "name";
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_UID = "uid";
+    private static final String KEY_CREATED_AT = "created_at";
 
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -89,6 +98,12 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_POLL_STATION + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_LOC);
 
+        String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
+                + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
+                + KEY_CREATED_AT + " TEXT" + ")";
+        db.execSQL(CREATE_LOGIN_TABLE);
+
 
     }
 
@@ -100,6 +115,40 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONSTITUENCIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_WARDS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_POLL_STATIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
+
+        onCreate(db);
+    }
+
+    /**
+     * Storing user details in database
+     */
+    public void addUser(String name, String email, String uid, String created_at) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NAME, name); // Name
+        values.put(KEY_EMAIL, email); // Email
+        values.put(KEY_UID, uid); // Email
+        values.put(KEY_CREATED_AT, created_at); // Created At
+
+        // Inserting Row
+        long id = db.insert(TABLE_USER, null, values);
+        db.close(); // Closing database connection
+
+        Log.d(TAG, "New user inserted into sqlite: " + id);
+    }
+
+    /**
+     * Re crate database Delete all tables and create them again
+     */
+    public void deleteUsers() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Delete All Rows
+        db.delete(TABLE_USER, null, null);
+        db.close();
+
+        Log.d(TAG, "Deleted all user info from sqlite");
     }
 
     public void addToTableOne(String county, String constituency, String ward, String pollStation) {

@@ -9,6 +9,8 @@ public class Urls {
     private static String baseUrl =
             // ip of your machine
             "http://fundilistapp.com/ts/";
+
+    private static String localBaseUrl = "http://192.168.100.7/ts-login/";
     // Server patient login url
     public static String CONSTITUENCIES = baseUrl + "const_name.php?county=";
     public static String WARDS = baseUrl + "ward_name.php?constituency=";
@@ -17,4 +19,6 @@ public class Urls {
     public static String PUSH_TO_TABELE_ONE = baseUrl + "post_tabele_one.php";
     public static String PUSH_TO_TABLE_TWO = baseUrl + "post_table_two.php";
     public static String UPLOAD_IMAGE = baseUrl + "upload_image.php";
+    public static String LOGIN = baseUrl + "login.php";
+    public static String REGISTER = baseUrl + "register.php";
 }

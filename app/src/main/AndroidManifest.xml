@@ -14,7 +14,28 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.activity.MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".ui.activity.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity
+            android:name=".ui.fragment.SettingsActivity"
+            android:label="@string/title_activity_settings" />
+
+        <!-- Adding a provider -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <activity
+            android:name=".ui.activity.Login"
+            android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,23 +43,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat" />
-        <activity
-            android:name=".ui.fragment.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:name=".ui.activity.Register"
+            android:theme="@style/NoActionBar">
 
-
-        <!-- Adding a provider -->
-        <provider
-            android:authorities="${applicationId}.provider"
-            android:name="android.support.v4.content.FileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
+        </activity>
     </application>
 
 </manifest>
