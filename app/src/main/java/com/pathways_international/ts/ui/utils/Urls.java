@@ -19,6 +19,8 @@ public class Urls {
     public static String PUSH_TO_TABELE_ONE = baseUrl + "post_tabele_one.php";
     public static String PUSH_TO_TABLE_TWO = baseUrl + "post_table_two.php";
     public static String UPLOAD_IMAGE = baseUrl + "upload_image.php";
+    public static String UPLOAD_TURNOUT_IMAGE = baseUrl + "upload_turnout_image.php";
     public static String LOGIN = baseUrl + "login.php";
     public static String REGISTER = baseUrl + "register.php";
+    public static String PUSH_TO_VOTER_TURNOUT = baseUrl + "push_to_voter_turnout.php";
 }
