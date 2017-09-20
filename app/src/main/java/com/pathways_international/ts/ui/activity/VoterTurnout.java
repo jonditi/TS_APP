@@ -149,7 +149,7 @@ public class VoterTurnout extends AppCompatActivity {
             constName = user.get("constituency_name");
 
             Log.d(LOG_TAG, constName);
-            actionBar.setTitle("VOTER TURNOUT" + " " + constName);
+            actionBar.setTitle("VOTER TURNOUT");
 
             pageTitle.setText(constName);
 
@@ -281,13 +281,14 @@ public class VoterTurnout extends AppCompatActivity {
 
         if (!totalString.isEmpty()) {
             buttonSubmit.setEnabled(false);
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + totalString);
+            Log.d(LOG_TAG, constName + "||" + wardStr + "||" + pollStStr + "||" + totalString);
 
             String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            pushToVoterTurnout(iD, totalString, String.valueOf(new Date()));
+            recordTurnout(iD, totalString, String.valueOf(new Date()));
+            Toast.makeText(getApplicationContext(), constName + "||" + wardStr + "||" + pollStStr + "||" + totalString, Toast.LENGTH_LONG).show();
             uploadImageClient(iD, totalString);
         } else {
             voterTurnoutTotalEditText.setError("Please fill in this field");
@@ -402,6 +403,34 @@ public class VoterTurnout extends AppCompatActivity {
 
         AppController.getInstance().addToRequestQueue(request);
 
+    }
+
+    private void recordTurnout(final String pollStId, final String totalString, final String timeOnDevice) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_VOTER_TURNOUT, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("Server response", response);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Server response", error.getMessage());
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("poll_station_id", pollStId);
+                params.put("votes", totalString);
+                params.put("time_on_device", timeOnDevice);
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
     }
 
 
@@ -618,7 +647,7 @@ public class VoterTurnout extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("poll_station_id", pollStId);
-                params.put("total,", totalVotes);
+                params.put("votes", totalVotes);
                 params.put("time_on_device", timeOnDevice);
                 return params;
             }
