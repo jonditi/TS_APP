@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by android-dev on 5/16/17.
@@ -19,7 +20,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Database Name
     private static final String DATABASE_NAME = "top_secret";
@@ -52,9 +53,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_SEAT = "seat";
 
     // Login Table Columns names
-    private static final String KEY_NAME = "name";
+    private static final String KEY_FIRST_NAME = "first_name";
+    private static final String KEY_LAST_NAME = "last_name";
+    private static final String KEY_ID_NUMBER = "id_number";
+    private static final String KEY_PHONE = "phone";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_UID = "uid";
+    private static final String KEY_CONST_CODE = "constituency_code";
+    private static final String KEY_CONST_NAME = "constituency_name";
     private static final String KEY_CREATED_AT = "created_at";
 
     public SQLiteHandler(Context context) {
@@ -99,8 +105,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_LOC);
 
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
-                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
+                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_FIRST_NAME + " TEXT,"
+                + KEY_LAST_NAME + " TEXT," + KEY_ID_NUMBER + " TEXT UNIQUE,"
+                + KEY_PHONE + " TEXT,"
+                + KEY_UID + " TEXT," + KEY_CONST_CODE + " TEXT, " + KEY_CONST_NAME + " TEXT,"
                 + KEY_CREATED_AT + " TEXT" + ")";
         db.execSQL(CREATE_LOGIN_TABLE);
 
@@ -123,13 +131,18 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     /**
      * Storing user details in database
      */
-    public void addUser(String name, String email, String uid, String created_at) {
+    public void addUser(String firstName, String lastName, String idNumber, String phone, String uid, String constCode,
+                        String constName, String created_at) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, name); // Name
-        values.put(KEY_EMAIL, email); // Email
-        values.put(KEY_UID, uid); // Email
+        values.put(KEY_FIRST_NAME, firstName); // first name
+        values.put(KEY_LAST_NAME, lastName); // last name
+        values.put(KEY_ID_NUMBER, idNumber); // id
+        values.put(KEY_PHONE, phone); // phone
+        values.put(KEY_UID, uid); // uid
+        values.put(KEY_CONST_CODE, constCode); // Constituency code
+        values.put(KEY_CONST_NAME, constName); // Constituency name
         values.put(KEY_CREATED_AT, created_at); // Created At
 
         // Inserting Row
@@ -240,6 +253,43 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_POLL_STATIONS, null, null);
         db.close();
+    }
+
+    /**
+     * Getting user data from database
+     */
+    public HashMap<String, String> getUserDetails() {
+        HashMap<String, String> client = new HashMap<String, String>();
+        String selectQuery = "SELECT  * FROM " + TABLE_USER + " WHERE id =" + KEY_ID;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        // Move to first row
+        cursor.moveToFirst();
+        if (cursor.getCount() > 0) {
+            // Column indices
+            int firstName = cursor.getColumnIndex("first_name");
+            int lastName = cursor.getColumnIndex("last_name");
+            int idNumber = cursor.getColumnIndex("id_number");
+            int phone = cursor.getColumnIndex("phone");
+            int constCode = cursor.getColumnIndex("constituency_code");
+            int constName = cursor.getColumnIndex("constituency_name");
+            int uid = cursor.getColumnIndex("uid");
+
+            client.put("first_name", cursor.getString(firstName));
+            client.put("last_name", cursor.getString(lastName));
+            client.put("id_number", cursor.getString(idNumber));
+            client.put("phone", cursor.getString(phone));
+            client.put("constituency_code", cursor.getString(constCode));
+            client.put("uid", cursor.getString(uid));
+            client.put("constituency_name", cursor.getString(constName));
+        }
+        cursor.close();
+        db.close();
+        // return client
+        Log.d(TAG, "Fetching client from Sqlite: " + client.toString());
+
+        return client;
     }
 
 

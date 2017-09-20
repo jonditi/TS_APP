@@ -11,7 +11,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
 import android.text.Editable;
@@ -44,6 +46,7 @@ import com.pathways_international.ts.ui.adapter.CountyAutoCompleteAdapter;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
+import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
 import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
@@ -99,6 +102,8 @@ public class MainFragment extends Fragment {
     EditText uhuruTotal;
     @BindView(R.id.spoilt_votes)
     EditText spoiltVotes;
+    @BindView(R.id.total_votes)
+    EditText totalVotes;
 
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
@@ -112,11 +117,13 @@ public class MainFragment extends Fragment {
     Spinner streamSpinner;
     @BindView(R.id.image_name)
     TextView imageName;
+    @BindView(R.id.page_title)
+    TextView pageTitle;
 
     @BindView(R.id.candidates_view)
     LinearLayout candidatesView;
 
-    String railaStr, uhuruStr, spoiltVotesStr;
+    String railaStr, uhuruStr, spoiltVotesStr, total;
 
     Bitmap bitmap;
 
@@ -124,6 +131,7 @@ public class MainFragment extends Fragment {
     private ImagePicker imagePicker = new ImagePicker();
 
     private SQLiteHandler sqLiteHandler;
+    private SessionManager sessionManager;
 
 
     String countyStr, constStr, wardStr, streamStr = "";
@@ -150,6 +158,8 @@ public class MainFragment extends Fragment {
 
     boolean isInitialDisplay = true;
 
+    String constName, constCode;
+
 
     public MainFragment() {
         // Required empty public constructor
@@ -160,7 +170,7 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
 //        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
@@ -175,6 +185,23 @@ public class MainFragment extends Fragment {
         }
 
         sqLiteHandler = new SQLiteHandler(getContext());
+        sessionManager = new SessionManager(getContext());
+
+        if (sessionManager.isLoggedIn()) {
+            HashMap<String, String> user = sqLiteHandler.getUserDetails();
+            constCode = user.get("constituency_code");
+            constName = user.get("constituency_name");
+
+            Log.d(LOG_TAG, constName);
+
+            pageTitle.setText(constName);
+
+            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
+                loadWardsRemote(constName);
+            }
+
+
+        }
 
         countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -202,7 +229,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 constStr = parent.getItemAtPosition(position).toString();
-                loadWardsRemote(constStr);
+//                loadWardsRemote(constStr);
 
 
             }
@@ -252,6 +279,35 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        spoiltVotes.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                int raila = Integer.parseInt(railaTotal.getText().toString());
+                int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+                if (!s.toString().isEmpty()) {
+                    int spoilt = Integer.parseInt(s.toString());
+                    totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+                }
+
+
+                if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+//                    totalVotes.setError("Total cannot exceed 700");
+                    Snackbar.make(rootView, "Total cannot exceed 700", Snackbar.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -348,6 +404,7 @@ public class MainFragment extends Fragment {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String ward = obj.getString("ward");
+                            countyStr = obj.getString("county");
                             wardsList.add(ward);
                         }
 
@@ -481,37 +538,38 @@ public class MainFragment extends Fragment {
         railaStr = railaTotal.getText().toString();
         uhuruStr = uhuruTotal.getText().toString();
         spoiltVotesStr = spoiltVotes.getText().toString();
+        total = totalVotes.getText().toString();
 
-        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty()) {
+
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty() && !total.isEmpty()) {
             buttonSubmit.setEnabled(false);
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
+            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
 
             String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr, streamStr);
-            pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr);
-            uploadImageClient(iD);
+            if (Integer.parseInt(total) > 700) {
+                Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_LONG).show();
+                buttonSubmit.setEnabled(true);
+            } else {
+//                Toast.makeText(getContext(), total, Toast.LENGTH_SHORT).show();
+                pushToTabeleOne(countyStr, constName, wardStr, pollStStr, streamStr);
+                pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
+                uploadImageClient(iD);
+//                railaTotal.setText("");
+//                uhuruTotal.setText("");
+//
+//                spoiltVotes.setText("");
+                candidatesView.setVisibility(View.GONE);
+                imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+            }
+
         } else {
             railaTotal.setError("Please fill in this field");
             uhuruTotal.setError("Please fill in this field");
             spoiltVotes.setError("Please fill in this field");
         }
-
-        edCounty.setText("");
-        edConstituency.setText("");
-
-        edWard.setText("");
-        edPollStation.setText("");
-
-        railaTotal.setText("");
-        uhuruTotal.setText("");
-
-        spoiltVotes.setText("");
-        candidatesView.setVisibility(View.GONE);
-        imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
-
 
     }
 
@@ -634,8 +692,8 @@ public class MainFragment extends Fragment {
                         Log.d("Upload image", s);
                         Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
                         // Clear the spinners
-                        wardSpinner.setAdapter(null);
-                        constituencySpinner.setAdapter(null);
+//                        wardSpinner.setAdapter(null);
+//                        constituencySpinner.setAdapter(null);
                         pollSpinner.setAdapter(null);
                         streamSpinner.setAdapter(null);
 
@@ -694,7 +752,7 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr) {
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -715,6 +773,7 @@ public class MainFragment extends Fragment {
                 params.put("raila", railaStr);
                 params.put("uhuru", uhuruStr);
                 params.put("spoilt_votes", spoiltVotesStr);
+                params.put("total", total);
                 return params;
             }
         };

@@ -21,8 +21,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@color/white"
-            android:hint="@string/hint_name"
-            android:inputType="text"
+            android:hint="@string/hint_id_number"
+            android:inputType="number"
             android:padding="10dp"
             android:textColor="@color/input_login"
             android:textColorHint="@color/input_login_hint" />

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -31,6 +32,7 @@ import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
+import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
 import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
@@ -76,6 +78,8 @@ public class VoterTurnout extends AppCompatActivity {
     Spinner streamSpinner;
     @BindView(R.id.image_name)
     TextView imageName;
+    @BindView(R.id.page_title)
+    TextView pageTitle;
 
     @BindView(R.id.voter_turnout_total)
     EditText voterTurnoutTotalEditText;
@@ -88,6 +92,7 @@ public class VoterTurnout extends AppCompatActivity {
     private ImagePicker imagePicker = new ImagePicker();
 
     private SQLiteHandler sqLiteHandler;
+    private SessionManager sessionManager;
 
 
     String countyStr, constStr, wardStr, streamStr = "";
@@ -111,7 +116,8 @@ public class VoterTurnout extends AppCompatActivity {
 
     private ProgressDialog pDialog;
 
-    Activity parentActivity;
+    String constName, constCode;
+
 
     boolean isInitialDisplay = true;
 
@@ -131,7 +137,28 @@ public class VoterTurnout extends AppCompatActivity {
             buttonSubmit.setEnabled(false);
         }
 
+        ActionBar actionBar = getSupportActionBar();
+
         sqLiteHandler = new SQLiteHandler(getApplicationContext());
+        sessionManager = new SessionManager(getApplicationContext());
+
+
+        if (sessionManager.isLoggedIn()) {
+            HashMap<String, String> user = sqLiteHandler.getUserDetails();
+            constCode = user.get("constituency_code");
+            constName = user.get("constituency_name");
+
+            Log.d(LOG_TAG, constName);
+            actionBar.setTitle("VOTER TURNOUT" + " " + constName);
+
+            pageTitle.setText(constName);
+
+            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
+                loadWardsRemote(constName);
+            }
+
+
+        }
 
         countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -260,8 +287,8 @@ public class VoterTurnout extends AppCompatActivity {
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            pushToVoterTurnout(iD, totalString, deviceTime);
-            uploadImageClient(iD);
+            pushToVoterTurnout(iD, totalString, String.valueOf(new Date()));
+            uploadImageClient(iD, totalString);
         } else {
             voterTurnoutTotalEditText.setError("Please fill in this field");
 
@@ -333,7 +360,7 @@ public class VoterTurnout extends AppCompatActivity {
     }
 
 
-    private void uploadImageClient(final String pollStId) {
+    private void uploadImageClient(final String pollStId, final String totalString) {
         final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
                 Locale.getDefault()).format(new Date());
         pDialog.setMessage("Uploading...");
@@ -348,8 +375,8 @@ public class VoterTurnout extends AppCompatActivity {
                         Log.d("Upload image", s);
                         Toast.makeText(VoterTurnout.this, "Data saved", Toast.LENGTH_SHORT).show();
                         // Clear the spinners
-                        wardSpinner.setAdapter(null);
-                        constituencySpinner.setAdapter(null);
+//                        wardSpinner.setAdapter(null);
+//                        constituencySpinner.setAdapter(null);
                         pollSpinner.setAdapter(null);
                         streamSpinner.setAdapter(null);
 
@@ -367,7 +394,7 @@ public class VoterTurnout extends AppCompatActivity {
 
                 Map<String, String> params = new HashMap<>();
                 params.put("image", image);
-                params.put("name", pollStId + "_" + timeStamp);
+                params.put("name", pollStId + "_" + timeStamp + "_" + totalString);
                 params.put("poll_station_id", pollStId);
                 return params;
             }
@@ -521,7 +548,7 @@ public class VoterTurnout extends AppCompatActivity {
         pDialog.dismiss();
         pollStStr = pollStStr.replace(" ", "%20");
         Log.d(LOG_TAG, pollStStr);
-        StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STREAM + pollStStr, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STREAM_TURNOUT + pollStStr, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 pDialog.dismiss();
@@ -591,7 +618,7 @@ public class VoterTurnout extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("poll_station_id", pollStId);
-                params.put("count,", totalVotes);
+                params.put("total,", totalVotes);
                 params.put("time_on_device", timeOnDevice);
                 return params;
             }

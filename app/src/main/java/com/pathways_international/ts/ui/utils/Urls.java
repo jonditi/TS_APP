@@ -16,6 +16,7 @@ public class Urls {
     public static String WARDS = baseUrl + "ward_name.php?constituency=";
     public static String POLL_STATION = baseUrl + "pollstation_name.php?ward=";
     public static String POLL_STREAM = baseUrl + "pollstation_stream.php?pname=";
+    public static String POLL_STREAM_TURNOUT = baseUrl + "stream_turnout.php?pname=";
     public static String PUSH_TO_TABELE_ONE = baseUrl + "post_tabele_one.php";
     public static String PUSH_TO_TABLE_TWO = baseUrl + "post_table_two.php";
     public static String UPLOAD_IMAGE = baseUrl + "upload_image.php";

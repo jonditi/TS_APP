@@ -37,6 +37,12 @@ public class Register extends AppCompatActivity {
     EditText nameEditText;
     @BindView(R.id.email)
     EditText emailEditText;
+    @BindView(R.id.last_name)
+    EditText lastNameEditText;
+    @BindView(R.id.id_number)
+    EditText idNumberEditText;
+    @BindView(R.id.phone)
+    EditText phoneEditText;
     @BindView(R.id.password)
     EditText passwordEditText;
 
@@ -74,11 +80,13 @@ public class Register extends AppCompatActivity {
     @OnClick(R.id.btnRegister)
     void register() {
         String userName = nameEditText.getText().toString();
-        String email = emailEditText.getText().toString();
+        String lastName = lastNameEditText.getText().toString();
+        String idNumber = idNumberEditText.getText().toString();
+        String phoneNumber = phoneEditText.getText().toString();
         String password = passwordEditText.getText().toString();
 
-        if (!userName.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-            signUp(userName, email, password);
+        if (!userName.isEmpty() && !lastName.isEmpty() && !idNumber.isEmpty() && !phoneNumber.isEmpty() && !password.isEmpty()) {
+            signUp(userName, lastName, idNumber, phoneNumber, password);
         } else {
             Toast.makeText(getApplicationContext(),
                     "Please enter your details!", Toast.LENGTH_LONG)
@@ -95,7 +103,7 @@ public class Register extends AppCompatActivity {
     /**
      * Register
      */
-    private void signUp(final String userName, final String email, final String password) {
+    private void signUp(final String userName, final String lastName, final String idNumber, final String phoneNumber, final String password) {
         pDialog.setMessage("Registering ...");
         pDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST, Urls.REGISTER, new Response.Listener<String>() {
@@ -104,42 +112,42 @@ public class Register extends AppCompatActivity {
                 pDialog.dismiss();
                 Log.d(LOG_TAG, response);
 
-                try {
-                    JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
-                    if (!error) {
-                        // User successfully stored in MySQL
-                        // Now store the user in sqlite
-                        String uid = jObj.getString("uid");
-
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
-                        String created_at = user
-                                .getString("created_at");
-
-                        // Inserting row in users table
-                        db.addUser(name, email, uid, created_at);
-
-                        Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
-
-                        // Launch login activity
-                        Intent intent = new Intent(
-                                Register.this,
-                                Login.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-
-                        // Error occurred in registration. Get the error
-                        // message
-                        String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
-                                errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    JSONObject jObj = new JSONObject(response);
+//                    boolean error = jObj.getBoolean("error");
+//                    if (!error) {
+//                        // User successfully stored in MySQL
+//                        // Now store the user in sqlite
+//                        String uid = jObj.getString("uid");
+//
+//                        JSONObject user = jObj.getJSONObject("user");
+//                        String name = user.getString("name");
+//                        String email = user.getString("email");
+//                        String created_at = user
+//                                .getString("created_at");
+//
+//                        // Inserting row in users table
+//                        db.addUser(name, email, uid, created_at);
+//
+//                        Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
+//
+//                        // Launch login activity
+//                        Intent intent = new Intent(
+//                                Register.this,
+//                                Login.class);
+//                        startActivity(intent);
+//                        finish();
+//                    } else {
+//
+//                        // Error occurred in registration. Get the error
+//                        // message
+//                        String errorMsg = jObj.getString("error_msg");
+//                        Toast.makeText(getApplicationContext(),
+//                                errorMsg, Toast.LENGTH_LONG).show();
+//                    }
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
 
             }
         }, new Response.ErrorListener() {
@@ -154,8 +162,10 @@ public class Register extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("name", userName);
-                params.put("email", email);
+                params.put("first_name", userName);
+                params.put("last_name", lastName);
+                params.put("id_number", idNumber);
+                params.put("phone", phoneNumber);
                 params.put("password", password);
 
                 return params;

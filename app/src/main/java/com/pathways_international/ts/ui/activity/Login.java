@@ -124,13 +124,17 @@ public class Login extends AppCompatActivity {
                         String uid = jObj.getString("uid");
 
                         JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
+                        String name = user.getString("first_name");
+                        String lastName = user.getString("last_name");
+                        String idNumber = user.getString("id_number");
+                        String phone = user.getString("phone");
+                        String constName = user.getJSONObject("constituency_code").getString("CONSTITUENCY_NAME");
+                        String constCode = user.getString("const_code");
                         String created_at = user
                                 .getString("created_at");
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, created_at);
 
                         // Launch main activity
                         Intent intent = new Intent(Login.this,
@@ -161,7 +165,7 @@ public class Login extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("name", userName);
+                params.put("id_number", userName);
                 params.put("password", password);
 
                 return params;
