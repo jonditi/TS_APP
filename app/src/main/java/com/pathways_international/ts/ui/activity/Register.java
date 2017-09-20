@@ -111,6 +111,8 @@ public class Register extends AppCompatActivity {
             public void onResponse(String response) {
                 pDialog.dismiss();
                 Log.d(LOG_TAG, response);
+                startActivity(new Intent(Register.this, Login.class));
+                finish();
 
 //                try {
 //                    JSONObject jObj = new JSONObject(response);
@@ -129,7 +131,7 @@ public class Register extends AppCompatActivity {
 //                        // Inserting row in users table
 //                        db.addUser(name, email, uid, created_at);
 //
-//                        Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
+//
 //
 //                        // Launch login activity
 //                        Intent intent = new Intent(
