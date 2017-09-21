@@ -283,6 +283,74 @@ public class MainFragment extends Fragment {
             }
         });
 
+        railaTotal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (railaTotal.getText().toString().isEmpty()) {
+                    railaTotal.setText("0");
+                }
+
+                if (!uhuruTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
+                    int raila = Integer.parseInt(railaTotal.getText().toString());
+                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+                    if (!s.toString().isEmpty()) {
+                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+                    }
+
+
+                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        uhuruTotal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (uhuruTotal.getText().toString().isEmpty()) {
+                    uhuruTotal.setText("0");
+
+                }
+
+                if (!railaTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
+                    int raila = Integer.parseInt(railaTotal.getText().toString());
+                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+                    if (!s.toString().isEmpty()) {
+                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+                    }
+
+
+                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         spoiltVotes.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -291,6 +359,15 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (railaTotal.getText().toString().isEmpty()) {
+                    railaTotal.setText("0");
+                }
+                if (uhuruTotal.getText().toString().isEmpty()) {
+                    uhuruTotal.setText("0");
+                }
+                if (spoiltVotes.getText().toString().isEmpty()) {
+                    spoiltVotes.setText("0");
+                }
                 if (!railaTotal.getText().toString().isEmpty() && !uhuruTotal.getText().toString().isEmpty()) {
                     int raila = Integer.parseInt(railaTotal.getText().toString());
                     int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
@@ -301,8 +378,6 @@ public class MainFragment extends Fragment {
 
 
                     if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-//                    totalVotes.setError("Total cannot exceed 700");
-//                    Snackbar.make(rootView, "Total cannot exceed 700", Snackbar.LENGTH_SHORT).show();
                         Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
                     }
                 }
