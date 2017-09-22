@@ -158,7 +158,7 @@ public class MainFragment extends Fragment {
 
     boolean isInitialDisplay = true;
 
-    String constName, constCode;
+    String constName, constCode, wardName, wardCode;
 
 
     public MainFragment() {
@@ -191,13 +191,21 @@ public class MainFragment extends Fragment {
             HashMap<String, String> user = sqLiteHandler.getUserDetails();
             constCode = user.get("constituency_code");
             constName = user.get("constituency_name");
+            wardName = user.get("ward_name");
+            wardCode = user.get("ward_code");
 
-            Log.d(LOG_TAG, constName);
+            Log.d(LOG_TAG, constName + "||" + wardName);
 
-            pageTitle.setText(constName);
+//            String title = getString(R.string.ward).concat(" ").concat(wardName);
 
-            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
-                loadWardsRemote(constName);
+            pageTitle.setText(getString(R.string.ward) + ": " + wardName);
+
+//            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
+//                loadWardsRemote(constName);
+//            }
+
+            if (pollStationList != null && pollStationList.isEmpty() && pollStationList.size() == 0) {
+                loadPollStationsRemote(wardName);
             }
 
 
@@ -305,7 +313,7 @@ public class MainFragment extends Fragment {
 
 
                     if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -340,7 +348,7 @@ public class MainFragment extends Fragment {
 
 
                     if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -378,7 +386,7 @@ public class MainFragment extends Fragment {
 
 
                     if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -507,7 +515,7 @@ public class MainFragment extends Fragment {
 
     private void loadPollStationsRemote(String wardStr) {
         pDialog.setMessage("Loading poll stations");
-        pDialog.dismiss();
+        pDialog.show();
         wardStr = wardStr.replace(" ", "%20");
         Log.d(LOG_TAG, wardStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STATION + wardStr, new Response.Listener<String>() {
@@ -533,6 +541,7 @@ public class MainFragment extends Fragment {
 //                                pollStationId.add(id);
                                 pollStationList.add(ward);
                             }
+                            countyStr = obj.getString("county");
 
                         }
 
@@ -582,7 +591,7 @@ public class MainFragment extends Fragment {
                             String stream = obj.getString("stream");
                             String id = obj.getString("id");
 
-                            if (ward.equals(wardStr)) {
+                            if (ward.equals(wardName)) {
                                 pollStationStreamList.add(stream);
 
                                 pollStationId.add(id);
@@ -622,27 +631,32 @@ public class MainFragment extends Fragment {
 
         if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty() && !total.isEmpty()) {
             buttonSubmit.setEnabled(false);
-            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
+            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardName + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
 
             String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+            countyStr = countyStr.replace("'", "\\'");
+            wardName = wardName.replace("'", "\\'");
+            constName = constName.replace("'", "\\'");
+            pollStStr = pollStStr.replace("'", "\\'");
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            if (Integer.parseInt(total) > 700) {
-                Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_LONG).show();
-                buttonSubmit.setEnabled(true);
-            } else {
-//                Toast.makeText(getContext(), total, Toast.LENGTH_SHORT).show();
-                pushToTabeleOne(countyStr, constName, wardStr, pollStStr, streamStr);
-                pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
-                uploadImageClient(iD);
+//            if (Integer.parseInt(total) > 700) {
+//                Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_LONG).show();
+//                buttonSubmit.setEnabled(true);
+//            } else {
+////                Toast.makeText(getContext(), total, Toast.LENGTH_SHORT).show();
+//
+//            }
+            pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
+            pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
+            uploadImageClient(iD);
 //                railaTotal.setText("");
 //                uhuruTotal.setText("");
 //
 //                spoiltVotes.setText("");
-                candidatesView.setVisibility(View.GONE);
-                imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
-            }
+            candidatesView.setVisibility(View.GONE);
+            imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
         } else {
             railaTotal.setError("Please fill in this field");
@@ -773,7 +787,7 @@ public class MainFragment extends Fragment {
                         // Clear the spinners
 //                        wardSpinner.setAdapter(null);
 //                        constituencySpinner.setAdapter(null);
-                        pollSpinner.setAdapter(null);
+//                        pollSpinner.setAdapter(null);
                         streamSpinner.setAdapter(null);
 
                     }

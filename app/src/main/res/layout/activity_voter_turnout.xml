@@ -60,7 +60,7 @@
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Constituency" />
+                android:text="@string/constituency" />
 
             <Spinner
                 android:padding="8dp"
@@ -69,25 +69,21 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
 
-            <TextView
-                android:padding="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Polling Center" />
 
             <Spinner
+
                 android:padding="8dp"
                 android:id="@+id/ward_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
 
             <TextView
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polling Station" />
+                android:text="@string/polling_center" />
 
 
             <Spinner
@@ -101,7 +97,7 @@
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stream" />
+                android:text="@string/polling_stream" />
 
 
             <Spinner

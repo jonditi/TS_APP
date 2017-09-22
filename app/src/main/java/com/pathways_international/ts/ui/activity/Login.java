@@ -129,12 +129,14 @@ public class Login extends AppCompatActivity {
                         String idNumber = user.getString("id_number");
                         String phone = user.getString("phone");
                         String constName = user.getJSONObject("constituency_code").getString("CONSTITUENCY_NAME");
+                        String wardName = user.getJSONObject("ward").getString("CAW_NAME");
                         String constCode = user.getString("const_code");
+                        String wardCode = user.getString("ward_code");
                         String created_at = user
                                 .getString("created_at");
 
                         // Inserting row in users table
-                        db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, created_at);
+                        db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, wardName, wardCode, created_at);
 
                         // Launch main activity
                         Intent intent = new Intent(Login.this,

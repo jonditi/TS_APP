@@ -56,6 +56,9 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.fotoapparat.Fotoapparat;
+import io.fotoapparat.parameter.ScaleType;
+import io.fotoapparat.view.CameraView;
 
 public class VoterTurnout extends AppCompatActivity {
 
@@ -116,7 +119,7 @@ public class VoterTurnout extends AppCompatActivity {
 
     private ProgressDialog pDialog;
 
-    String constName, constCode;
+    String constName, constCode, wardName, wardCode;
 
 
     boolean isInitialDisplay = true;
@@ -147,18 +150,29 @@ public class VoterTurnout extends AppCompatActivity {
             HashMap<String, String> user = sqLiteHandler.getUserDetails();
             constCode = user.get("constituency_code");
             constName = user.get("constituency_name");
+            wardName = user.get("ward_name");
+            wardCode = user.get("ward_code");
 
             Log.d(LOG_TAG, constName);
             actionBar.setTitle("VOTER TURNOUT");
 
-            pageTitle.setText(constName);
+            pageTitle.setText(getString(R.string.ward) + ": " + wardName);
 
-            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
-                loadWardsRemote(constName);
+//            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
+//                loadWardsRemote(constName);
+//            }
+
+            if (pollStationList != null && pollStationList.isEmpty() && pollStationList.size() == 0) {
+                loadPollStationsRemote(wardName);
             }
 
 
         }
+//
+//        Fotoapparat.with(getApplicationContext())
+//                .into(cameraView)
+//                .previewScaleType(ScaleType.CENTER_CROP)
+//                .photoSize()
 
         countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -281,14 +295,19 @@ public class VoterTurnout extends AppCompatActivity {
 
         if (!totalString.isEmpty()) {
             buttonSubmit.setEnabled(false);
-            Log.d(LOG_TAG, constName + "||" + wardStr + "||" + pollStStr + "||" + totalString);
+            Log.d(LOG_TAG, constName + "||" + wardName + "||" + pollStStr + "||" + totalString);
 
             String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+
+            countyStr = countyStr.replace("'", "\\'");
+            wardName = wardName.replace("'", "\\'");
+            constName = constName.replace("'", "\\'");
+            pollStStr = pollStStr.replace("'", "\\'");
 
 //          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
 //          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
             recordTurnout(iD, totalString, String.valueOf(new Date()));
-            Toast.makeText(getApplicationContext(), constName + "||" + wardStr + "||" + pollStStr + "||" + totalString, Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), constName + "||" + wardStr + "||" + pollStStr + "||" + totalString, Toast.LENGTH_LONG).show();
             uploadImageClient(iD, totalString);
         } else {
             voterTurnoutTotalEditText.setError("Please fill in this field");
@@ -378,7 +397,7 @@ public class VoterTurnout extends AppCompatActivity {
                         // Clear the spinners
 //                        wardSpinner.setAdapter(null);
 //                        constituencySpinner.setAdapter(null);
-                        pollSpinner.setAdapter(null);
+//                        pollSpinner.setAdapter(null);
                         streamSpinner.setAdapter(null);
 
                     }
@@ -524,7 +543,7 @@ public class VoterTurnout extends AppCompatActivity {
 
     private void loadPollStationsRemote(String wardStr) {
         pDialog.setMessage("Loading poll stations");
-        pDialog.dismiss();
+        pDialog.show();
         wardStr = wardStr.replace(" ", "%20");
         Log.d(LOG_TAG, wardStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STATION + wardStr, new Response.Listener<String>() {
@@ -599,7 +618,7 @@ public class VoterTurnout extends AppCompatActivity {
                             String stream = obj.getString("stream");
                             String id = obj.getString("id");
 
-                            if (ward.equals(wardStr)) {
+                            if (ward.equals(wardName)) {
                                 pollStationStreamList.add(stream);
 
                                 pollStationId.add(id);

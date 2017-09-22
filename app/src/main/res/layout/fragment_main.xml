@@ -47,7 +47,7 @@
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="County" />
+                android:text="@string/county" />
 
             <Spinner
                 android:visibility="gone"
@@ -62,7 +62,7 @@
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Constituency" />
+                android:text="@string/constituency" />
 
             <Spinner
                 android:padding="8dp"
@@ -72,24 +72,25 @@
                 android:visibility="gone" />
 
             <TextView
+                android:visibility="gone"
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polling Center" />
+                android:text="@string/ward" />
 
             <Spinner
                 android:padding="8dp"
                 android:id="@+id/ward_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
 
             <TextView
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polling Station" />
+                android:text="@string/polling_center" />
 
 
             <Spinner
@@ -103,7 +104,7 @@
                 android:padding="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stream" />
+                android:text="@string/polling_stream" />
 
 
             <Spinner
@@ -119,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
-                android:hint="County"
+                android:hint="@string/county"
                 android:padding="10dp"
                 android:visibility="gone" />
 
@@ -129,7 +130,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
-                android:hint="Constituency"
+                android:hint="@string/constituency"
                 android:padding="10dp"
                 android:visibility="gone" />
 
@@ -139,7 +140,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
-                android:hint="Ward"
+                android:hint="@string/ward"
                 android:padding="10dp"
                 android:visibility="gone" />
 
@@ -149,7 +150,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
-                android:hint="Polling Station"
+                android:hint="@string/polling_center"
                 android:padding="10dp"
                 android:visibility="gone" />
 

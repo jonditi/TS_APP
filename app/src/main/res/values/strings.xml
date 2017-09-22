@@ -165,4 +165,9 @@
     <string name="btn_logout">LOGOUT</string>
     <string name="name">Fullname</string>
     <string name="voter_turn_out">Voter Turn Out</string>
+    <string name="polling_center">Polling Center</string>
+    <string name="polling_stream">Stream</string>
+    <string name="county">County</string>
+    <string name="constituency">Constituency</string>
+    <string name="ward">Ward</string>
 </resources>

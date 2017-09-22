@@ -20,7 +20,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Database Name
     private static final String DATABASE_NAME = "top_secret";
@@ -61,6 +61,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_UID = "uid";
     private static final String KEY_CONST_CODE = "constituency_code";
     private static final String KEY_CONST_NAME = "constituency_name";
+    private static final String KEY_WARD_NAME = "ward_name";
+    private static final String KEY_WARD_CODE = "ward_code";
     private static final String KEY_CREATED_AT = "created_at";
 
     public SQLiteHandler(Context context) {
@@ -109,6 +111,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_LAST_NAME + " TEXT," + KEY_ID_NUMBER + " TEXT UNIQUE,"
                 + KEY_PHONE + " TEXT,"
                 + KEY_UID + " TEXT," + KEY_CONST_CODE + " TEXT, " + KEY_CONST_NAME + " TEXT,"
+                + KEY_WARD_NAME + " TEXT," + KEY_WARD_CODE + " TEXT,"
                 + KEY_CREATED_AT + " TEXT" + ")";
         db.execSQL(CREATE_LOGIN_TABLE);
 
@@ -132,7 +135,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      * Storing user details in database
      */
     public void addUser(String firstName, String lastName, String idNumber, String phone, String uid, String constCode,
-                        String constName, String created_at) {
+                        String constName, String wardName, String wardCode, String created_at) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -143,6 +146,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_UID, uid); // uid
         values.put(KEY_CONST_CODE, constCode); // Constituency code
         values.put(KEY_CONST_NAME, constName); // Constituency name
+        values.put(KEY_WARD_NAME, wardName); // ward name
+        values.put(KEY_WARD_CODE, wardCode); // ward code
         values.put(KEY_CREATED_AT, created_at); // Created At
 
         // Inserting Row
@@ -274,6 +279,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
             int phone = cursor.getColumnIndex("phone");
             int constCode = cursor.getColumnIndex("constituency_code");
             int constName = cursor.getColumnIndex("constituency_name");
+            int wardName = cursor.getColumnIndex("ward_name");
+            int wardCode = cursor.getColumnIndex("ward_code");
             int uid = cursor.getColumnIndex("uid");
 
             client.put("first_name", cursor.getString(firstName));
@@ -283,6 +290,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
             client.put("constituency_code", cursor.getString(constCode));
             client.put("uid", cursor.getString(uid));
             client.put("constituency_name", cursor.getString(constName));
+            client.put("ward_name", cursor.getString(wardName));
+            client.put("ward_code", cursor.getString(wardCode));
         }
         cursor.close();
         db.close();
