@@ -38,6 +38,10 @@ import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
+import com.vansuita.pickimage.bean.PickResult;
+import com.vansuita.pickimage.bundle.PickSetup;
+import com.vansuita.pickimage.dialog.PickImageDialog;
+import com.vansuita.pickimage.listeners.IPickResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,7 +64,7 @@ import io.fotoapparat.Fotoapparat;
 import io.fotoapparat.parameter.ScaleType;
 import io.fotoapparat.view.CameraView;
 
-public class VoterTurnout extends AppCompatActivity {
+public class VoterTurnout extends AppCompatActivity implements IPickResult {
 
     private static final String LOG_TAG = VoterTurnout.class.getSimpleName();
 
@@ -98,7 +102,7 @@ public class VoterTurnout extends AppCompatActivity {
     private SessionManager sessionManager;
 
 
-    String countyStr, constStr, wardStr, streamStr = "";
+    String countyStr, streamStr = "";
     String pollStStr = "";
     String deviceTime;
 
@@ -158,72 +162,12 @@ public class VoterTurnout extends AppCompatActivity {
 
             pageTitle.setText(getString(R.string.ward) + ": " + wardName);
 
-//            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
-//                loadWardsRemote(constName);
-//            }
-
             if (pollStationList != null && pollStationList.isEmpty() && pollStationList.size() == 0) {
                 loadPollStationsRemote(wardName);
             }
 
 
         }
-//
-//        Fotoapparat.with(getApplicationContext())
-//                .into(cameraView)
-//                .previewScaleType(ScaleType.CENTER_CROP)
-//                .photoSize()
-
-        countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isInitialDisplay) {
-                    isInitialDisplay = false;
-                } else {
-                    countyStr = parent.getItemAtPosition(position).toString();
-                    if (countyStr.contains(" ")) {
-                        Log.d(LOG_TAG, "Spacesssssssssssssssssssssssssss");
-                    }
-                    loadConstituencies(countyStr);
-
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        constituencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                constStr = parent.getItemAtPosition(position).toString();
-                loadWardsRemote(constStr);
-
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        wardSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                wardStr = parent.getItemAtPosition(position).toString();
-                Log.d(LOG_TAG, wardStr);
-                loadPollStationsRemote(wardStr);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -254,26 +198,6 @@ public class VoterTurnout extends AppCompatActivity {
             }
         });
 
-//        railaTotal.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (s.toString().trim().length() > 0) {
-//                    railaStr = s.toString();
-//                    Log.d(LOG_TAG, railaStr);
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
-
 
         imagePicker.setCropImage(true);
     }
@@ -285,6 +209,8 @@ public class VoterTurnout extends AppCompatActivity {
             Toast.makeText(VoterTurnout.this, "Select a poll station first", Toast.LENGTH_SHORT).show();
         } else {
             startChooser();
+            // To remove image cropping
+//            PickImageDialog.build(new PickSetup()).show(this);
         }
 
     }
@@ -570,6 +496,8 @@ public class VoterTurnout extends AppCompatActivity {
                                 pollStationList.add(ward);
                             }
 
+                            countyStr = obj.getString("county");
+
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
@@ -685,4 +613,16 @@ public class VoterTurnout extends AppCompatActivity {
         if (pDialog.isShowing())
             pDialog.dismiss();
     }
+
+    @Override
+    public void onPickResult(PickResult pickResult) {
+        if (pickResult.getError() == null) {
+            imageViewContainer.setImageBitmap(pickResult.getBitmap());
+
+            bitmap = pickResult.getBitmap();
+
+            buttonSubmit.setEnabled(true);
+        }
+    }
+
 }

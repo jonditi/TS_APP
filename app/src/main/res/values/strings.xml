@@ -156,6 +156,11 @@
     <string name="raila_total">Raila</string>
     <string name="hint_uhuru_total">Uhuru</string>
     <string name="hint_spoilt">Spoilt Votes</string>
+    <string name="hint_registered_voters">Registered Voters</string>
+    <string name="hint_rejected_ballot">Rejected ballot papers</string>
+    <string name="hint_objected_ballot">Rejected objected ballot papers</string>
+    <string name="hint_disputed">Disputed votes</string>
+    <string name="hint_valid_votes">Valid votes cast</string>
     <string name="hint_total">Total</string>
     <string name="btn_login">LOGIN</string>
     <string name="btn_register">REGISTER</string>
@@ -166,6 +171,7 @@
     <string name="name">Fullname</string>
     <string name="voter_turn_out">Voter Turn Out</string>
     <string name="polling_center">Polling Center</string>
+    <string name="polling_station">Polling Station</string>
     <string name="polling_stream">Stream</string>
     <string name="county">County</string>
     <string name="constituency">Constituency</string>

@@ -134,7 +134,7 @@ public class MainFragment extends Fragment {
     private SessionManager sessionManager;
 
 
-    String countyStr, constStr, wardStr, streamStr = "";
+    String countyStr, streamStr = "";
     String pollStStr = "";
 
 //    Spinner seatSpinner;
@@ -173,8 +173,6 @@ public class MainFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
-//        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
-
         locationsPreference = new LocationSharedPrefs(getActivity());
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
@@ -196,13 +194,8 @@ public class MainFragment extends Fragment {
 
             Log.d(LOG_TAG, constName + "||" + wardName);
 
-//            String title = getString(R.string.ward).concat(" ").concat(wardName);
-
             pageTitle.setText(getString(R.string.ward) + ": " + wardName);
 
-//            if (wardsList != null && wardsList.isEmpty() && wardsList.size() == 0) {
-//                loadWardsRemote(constName);
-//            }
 
             if (pollStationList != null && pollStationList.isEmpty() && pollStationList.size() == 0) {
                 loadPollStationsRemote(wardName);
@@ -210,57 +203,6 @@ public class MainFragment extends Fragment {
 
 
         }
-
-        countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isInitialDisplay) {
-                    isInitialDisplay = false;
-                } else {
-                    countyStr = parent.getItemAtPosition(position).toString();
-                    if (countyStr.contains(" ")) {
-                        Log.d(LOG_TAG, "Spacesssssssssssssssssssssssssss");
-                    }
-                    loadConstituencies(countyStr);
-
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        constituencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                constStr = parent.getItemAtPosition(position).toString();
-//                loadWardsRemote(constStr);
-
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        wardSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                wardStr = parent.getItemAtPosition(position).toString();
-                Log.d(LOG_TAG, wardStr);
-                loadPollStationsRemote(wardStr);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -398,26 +340,6 @@ public class MainFragment extends Fragment {
 
             }
         });
-
-//        railaTotal.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (s.toString().trim().length() > 0) {
-//                    railaStr = s.toString();
-//                    Log.d(LOG_TAG, railaStr);
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
 
 
         imagePicker.setCropImage(true);
@@ -639,15 +561,6 @@ public class MainFragment extends Fragment {
             constName = constName.replace("'", "\\'");
             pollStStr = pollStStr.replace("'", "\\'");
 
-//          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
-//          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-//            if (Integer.parseInt(total) > 700) {
-//                Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_LONG).show();
-//                buttonSubmit.setEnabled(true);
-//            } else {
-////                Toast.makeText(getContext(), total, Toast.LENGTH_SHORT).show();
-//
-//            }
             pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
             pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
             uploadImageClient(iD);
@@ -704,7 +617,6 @@ public class MainFragment extends Fragment {
             public void onCropImage(Uri imageUri) {
                 super.onCropImage(imageUri);
                 if (position == 1) {
-//                    imageViewContainer.setImageURI(imageUri);
                     try {
                         Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
@@ -772,7 +684,6 @@ public class MainFragment extends Fragment {
     private void uploadImageClient(final String pollStId) {
         final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
                 Locale.getDefault()).format(new Date());
-//        progressBar.setVisibility(View.VISIBLE);
         pDialog.setMessage("Uploading...");
         showDialog();
         Log.d("Image upload", "started");
@@ -784,10 +695,7 @@ public class MainFragment extends Fragment {
                         buttonSubmit.setEnabled(true);
                         Log.d("Upload image", s);
                         Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-                        // Clear the spinners
-//                        wardSpinner.setAdapter(null);
-//                        constituencySpinner.setAdapter(null);
-//                        pollSpinner.setAdapter(null);
+                        // Clear the spinner
                         streamSpinner.setAdapter(null);
 
                     }
