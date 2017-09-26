@@ -1,9 +1,15 @@
 package com.pathways_international.ts.ui.activity;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,12 +52,21 @@ public class Login extends AppCompatActivity {
     private ProgressDialog pDialog;
     private SessionManager session;
     private SQLiteHandler db;
+    private final PermissionsDelegate permissionsDelegate = new PermissionsDelegate(this);
+    private boolean hasSendSmsPermission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+
+//        askForPermission(Manifest.permission.READ_SMS, 0);
+        hasSendSmsPermission = permissionsDelegate.hasSendSmsPermission();
+
+        if (!hasSendSmsPermission) {
+            permissionsDelegate.requestSendSmsPermission();
+        }
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -97,6 +112,32 @@ public class Login extends AppCompatActivity {
         startActivity(new Intent(this, Register.class));
     }
 
+    private void askForPermission(String permission, Integer requestCode) {
+        if (ContextCompat.checkSelfPermission(Login.this, permission) != PackageManager.PERMISSION_GRANTED) {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(Login.this, permission)) {
+                // Called if the user has denied the permission before
+                ActivityCompat.requestPermissions(Login.this, new String[]{permission}, requestCode);
+            } else {
+                ActivityCompat.requestPermissions(Login.this, new String[]{permission}, requestCode);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (ActivityCompat.checkSelfPermission(this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case 0:
+
+            }
+        }
+        if (permissionsDelegate.resultGranted(requestCode, permissions, grantResults)) {
+
+        }
+    }
+
     /**
      * Login
      */
@@ -130,6 +171,7 @@ public class Login extends AppCompatActivity {
                         String phone = user.getString("phone");
                         String constName = user.getJSONObject("constituency_code").getString("CONSTITUENCY_NAME");
                         String wardName = user.getJSONObject("ward").getString("CAW_NAME");
+                        String verificationKey = user.getJSONObject("verification_key").getString("verification_key");
                         String constCode = user.getString("const_code");
                         String wardCode = user.getString("ward_code");
                         String created_at = user
@@ -138,9 +180,11 @@ public class Login extends AppCompatActivity {
                         // Inserting row in users table
                         db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, wardName, wardCode, created_at);
 
+                        sendVerificationKeyInSms(phone, verificationKey);
+
                         // Launch main activity
                         Intent intent = new Intent(Login.this,
-                                MainActivity.class);
+                                VerifyKey.class);
                         startActivity(intent);
                         finish();
                     } else {
@@ -175,5 +219,17 @@ public class Login extends AppCompatActivity {
         };
 
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void sendVerificationKeyInSms(String phoneNumber, String verificationKey) {
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, verificationKey, null, null);
+            Log.d(LOG_TAG, phoneNumber + " " + verificationKey + " Message sent");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

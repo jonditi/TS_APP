@@ -4,6 +4,8 @@
     package="com.pathways_international.ts">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
         android:name=".ui.app.AppController"
@@ -22,7 +24,6 @@
         <activity
             android:name=".ui.fragment.SettingsActivity"
             android:label="@string/title_activity_settings" />
-
         <activity
             android:name=".ui.activity.Login"
             android:theme="@style/NoActionBar">
@@ -34,7 +35,7 @@
         </activity>
         <activity
             android:name=".ui.activity.Register"
-            android:theme="@style/NoActionBar"></activity>
+            android:theme="@style/NoActionBar" />
         <activity android:name=".ui.activity.VoterTurnout">
             <provider
                 android:name="android.support.v4.content.FileProvider"
@@ -47,6 +48,19 @@
                     android:resource="@xml/picker_provider_paths" />
             </provider>
         </activity>
+        <activity
+            android:name=".ui.activity.VerifyKey"
+            android:theme="@style/NoActionBar">
+
+        </activity>
+
+        <receiver
+            android:name=".ui.receivers.SmsBroadcastReceiver"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

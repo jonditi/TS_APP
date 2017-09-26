@@ -153,6 +153,9 @@
     <string name="hint_last_name">Last Name</string>
     <string name="hint_phone">Phone</string>
     <string name="hint_id_number">Id Number</string>
+    <string name="hint_verification_key">Verification key</string>
+    <string name="hint_verification">Verification</string>
+    <string name="hint_verification_message">Waiting to automatically detect code sent to </string>
     <string name="raila_total">Raila</string>
     <string name="hint_uhuru_total">Uhuru</string>
     <string name="hint_spoilt">Spoilt Votes</string>

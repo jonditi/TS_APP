@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary"
+    android:background="@color/bg_register"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="10dp">
@@ -17,6 +17,7 @@
         android:text="No permission granted."
         android:textSize="20sp"
         android:visibility="gone"
+        android:textColor="@color/white"
         tools:visibility="visible" />
 
     <LinearLayout
@@ -27,54 +28,50 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hint_verification"
+            android:textColor="@color/white"
+            android:textAllCaps="true"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:id="@+id/msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textColor="@color/white"
+            android:text="@string/hint_verification_message"
+            android:textSize="20dp"
+            android:layout_marginBottom="10dp" />
+
         <EditText
-            android:id="@+id/user_name"
+            android:id="@+id/verification_key"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@color/white"
-            android:hint="@string/hint_id_number"
-            android:inputType="number"
+            android:hint="@string/hint_verification_key"
+            android:inputType="text"
             android:padding="10dp"
             android:textColor="@color/input_login"
             android:textColorHint="@color/input_login_hint" />
-
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@color/white"
-            android:hint="@string/hint_password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:textColor="@color/input_login"
-            android:textColorHint="@color/input_login_hint" />
-
-        <!-- Login Button -->
 
         <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="fill_parent"
+            android:id="@+id/done"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"
-            android:background="@color/btn_login_bg"
-            android:text="@string/btn_login"
-            android:textColor="@color/btn_login" />
-
-        <!-- Link to Login Screen -->
-
-        <Button
-            android:visibility="gone"
-            android:id="@+id/btnLinkToRegisterScreen"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dip"
-            android:background="@null"
-            android:text="@string/btn_link_to_register"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="15dp" />
+            android:background="#ea4c88"
+            android:text="DONE"
+            android:textColor="@color/white" />
     </LinearLayout>
 
 </LinearLayout>

@@ -47,4 +47,13 @@ public class SessionManager {
     public boolean isLoggedIn() {
         return pref.getBoolean(KEY_IS_LOGGED_IN, false);
     }
+
+    public String getMessage() {
+        return pref.getString("message", "");
+    }
+
+    public void setMessage(String message) {
+        editor.putString("message", message);
+        editor.apply();
+    }
 }
