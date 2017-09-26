@@ -1,6 +1,7 @@
 package com.pathways_international.ts.ui.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pathways_international.ts.R;
+import com.pathways_international.ts.ui.fragment.MainFragment;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 
@@ -85,6 +87,11 @@ public class VerifyKey extends AppCompatActivity {
 
             }
         }
+    }
+
+    @OnClick(R.id.done)
+    void doneClicked() {
+        startActivity(new Intent(this, MainActivity.class));
     }
 
 }

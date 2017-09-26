@@ -1,13 +1,14 @@
 package com.pathways_international.ts.ui.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -223,18 +224,33 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
             buttonSubmit.setEnabled(false);
             Log.d(LOG_TAG, constName + "||" + wardName + "||" + pollStStr + "||" + totalString);
 
-            String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+            final String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
 
             countyStr = countyStr.replace("'", "\\'");
             wardName = wardName.replace("'", "\\'");
             constName = constName.replace("'", "\\'");
             pollStStr = pollStStr.replace("'", "\\'");
 
-//          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
-//          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            recordTurnout(iD, totalString, String.valueOf(new Date()));
-//            Toast.makeText(getApplicationContext(), constName + "||" + wardStr + "||" + pollStStr + "||" + totalString, Toast.LENGTH_LONG).show();
-            uploadImageClient(iD, totalString);
+            AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnout.this);
+            builder.setTitle("Post data");
+            builder.setMessage("Proceed with posting of data");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    recordTurnout(iD, totalString, String.valueOf(new Date()));
+                    uploadImageClient(iD, totalString);
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
         } else {
             voterTurnoutTotalEditText.setError("Please fill in this field");
 
@@ -271,7 +287,6 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
             public void onCropImage(Uri imageUri) {
                 super.onCropImage(imageUri);
                 if (position == 1) {
-//                    imageViewContainer.setImageURI(imageUri);
                     try {
                         Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
@@ -319,11 +334,20 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
                         pDialog.dismiss();
                         buttonSubmit.setEnabled(true);
                         Log.d("Upload image", s);
-                        Toast.makeText(VoterTurnout.this, "Data saved", Toast.LENGTH_SHORT).show();
+                        // Show dialogbox
+                        AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnout.this);
+                        builder.setTitle("Success!");
+                        builder.setMessage("Data saved successfully");
+                        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
                         // Clear the spinners
-//                        wardSpinner.setAdapter(null);
-//                        constituencySpinner.setAdapter(null);
-//                        pollSpinner.setAdapter(null);
                         streamSpinner.setAdapter(null);
 
                     }

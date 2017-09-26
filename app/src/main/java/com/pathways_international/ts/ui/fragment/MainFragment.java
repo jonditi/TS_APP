@@ -2,7 +2,6 @@ package com.pathways_international.ts.ui.fragment;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
@@ -30,7 +30,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,8 +40,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.pathways_international.ts.R;
-import com.pathways_international.ts.ui.adapter.ConstituencyAutoCompleteAdapter;
-import com.pathways_international.ts.ui.adapter.CountyAutoCompleteAdapter;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
@@ -104,6 +101,12 @@ public class MainFragment extends Fragment {
     EditText spoiltVotes;
     @BindView(R.id.total_votes)
     EditText totalVotes;
+    @BindView(R.id.rejected_ballot)
+    EditText rejectedBallot;
+    @BindView(R.id.objected_rejected)
+    EditText objectedRejected;
+    @BindView(R.id.disputed_votes)
+    EditText disputed;
 
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
@@ -124,6 +127,11 @@ public class MainFragment extends Fragment {
     LinearLayout candidatesView;
 
     String railaStr, uhuruStr, spoiltVotesStr, total;
+    String registerdVoters;
+    String rejectedBallotPapersStr;
+    String rejectedObjectedStr;
+    String disputedVotes;
+    String validVotesStr;
 
     Bitmap bitmap;
 
@@ -549,27 +557,51 @@ public class MainFragment extends Fragment {
         uhuruStr = uhuruTotal.getText().toString();
         spoiltVotesStr = spoiltVotes.getText().toString();
         total = totalVotes.getText().toString();
+        registerdVoters = spoiltVotesStr;
+        rejectedBallotPapersStr = rejectedBallot.getText().toString();
+        rejectedObjectedStr = objectedRejected.getText().toString();
+        disputedVotes = disputed.getText().toString();
+        validVotesStr = total;
 
 
         if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty() && !total.isEmpty()) {
             buttonSubmit.setEnabled(false);
-            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardName + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
 
-            String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
             countyStr = countyStr.replace("'", "\\'");
             wardName = wardName.replace("'", "\\'");
             constName = constName.replace("'", "\\'");
             pollStStr = pollStStr.replace("'", "\\'");
 
-            pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
-            pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
-            uploadImageClient(iD);
-//                railaTotal.setText("");
-//                uhuruTotal.setText("");
-//
-//                spoiltVotes.setText("");
-            candidatesView.setVisibility(View.GONE);
-            imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardName + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
+            final String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Post data");
+            builder.setMessage("Confirm posting of the data as it is");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
+
+                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
+
+                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+
+                    uploadImageClient(iD);
+                    candidatesView.setVisibility(View.GONE);
+                    imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
 
         } else {
             railaTotal.setError("Please fill in this field");
@@ -692,9 +724,24 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onResponse(String s) {
                         pDialog.dismiss();
-                        buttonSubmit.setEnabled(true);
+                        buttonSubmit.setEnabled(false);
                         Log.d("Upload image", s);
-                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
+
+                        // Show dialogbox
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Success!");
+                        builder.setMessage("Data saved successfully");
+                        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+
                         // Clear the spinner
                         streamSpinner.setAdapter(null);
 
@@ -781,6 +828,40 @@ public class MainFragment extends Fragment {
 
         AppController.getInstance().addToRequestQueue(request);
 
+    }
+
+    private void pushToTableTwoDev(final String pollStId, final String railaStr, final String uhuruStr, final String registeredVoters,
+                                   final String rejectedBallotPapersStr, final String rejectedObjectedStr, final String disputedVotes,
+                                   final String validVotesStr, final String timeOnDevice) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO_DEV, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("poll_station_id", pollStId);
+                params.put("raila", railaStr);
+                params.put("uhuru", uhuruStr);
+                params.put("registered_voters", registeredVoters);
+                params.put("rejected_ballot", rejectedBallotPapersStr);
+                params.put("rejected_objected", rejectedObjectedStr);
+                params.put("disputed_votes", disputedVotes);
+                params.put("valid_votes", validVotesStr);
+                params.put("time_on_device", timeOnDevice);
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
     }
 
     private File saveImageToExternal(Uri imageUri, String pollStId) {

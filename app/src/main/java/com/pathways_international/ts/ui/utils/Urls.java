@@ -19,6 +19,7 @@ public class Urls {
     public static String POLL_STREAM_TURNOUT = baseUrl + "stream_turnout.php?pname=";
     public static String PUSH_TO_TABELE_ONE = baseUrl + "post_tabele_one.php";
     public static String PUSH_TO_TABLE_TWO = baseUrl + "post_table_two.php";
+    public static String PUSH_TO_TABLE_TWO_DEV = baseUrl + "push_table_two_dev.php";
     public static String UPLOAD_IMAGE = baseUrl + "upload_image.php";
     public static String UPLOAD_TURNOUT_IMAGE = baseUrl + "upload_turnout_image.php";
     public static String LOGIN = baseUrl + "login.php";
