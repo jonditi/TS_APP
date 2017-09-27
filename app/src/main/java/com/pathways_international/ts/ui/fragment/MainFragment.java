@@ -256,10 +256,10 @@ public class MainFragment extends Fragment {
                 if (!uhuruTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
                     int raila = Integer.parseInt(railaTotal.getText().toString());
                     int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
-                    if (!s.toString().isEmpty()) {
-                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
-                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
-                    }
+//                    if (!s.toString().isEmpty()) {
+//                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+//                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+//                    }
 
 
                     if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
@@ -291,15 +291,15 @@ public class MainFragment extends Fragment {
                 if (!railaTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
                     int raila = Integer.parseInt(railaTotal.getText().toString());
                     int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
-                    if (!s.toString().isEmpty()) {
-                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
-                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
-                    }
-
-
-                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-//                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
-                    }
+//                    if (!s.toString().isEmpty()) {
+//                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+//                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+//                    }
+//
+//
+//                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+////                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                    }
                 }
             }
 
@@ -326,19 +326,19 @@ public class MainFragment extends Fragment {
                 if (spoiltVotes.getText().toString().isEmpty()) {
                     spoiltVotes.setText("0");
                 }
-                if (!railaTotal.getText().toString().isEmpty() && !uhuruTotal.getText().toString().isEmpty()) {
-                    int raila = Integer.parseInt(railaTotal.getText().toString());
-                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
-                    if (!s.toString().isEmpty()) {
-                        int spoilt = Integer.parseInt(s.toString());
-                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
-                    }
-
-
-                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
-//                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
-                    }
-                }
+//                if (!railaTotal.getText().toString().isEmpty() && !uhuruTotal.getText().toString().isEmpty()) {
+//                    int raila = Integer.parseInt(railaTotal.getText().toString());
+//                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+//                    if (!s.toString().isEmpty()) {
+//                        int spoilt = Integer.parseInt(s.toString());
+//                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+//                    }
+//
+//
+//                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+////                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
 
 
             }
@@ -562,6 +562,13 @@ public class MainFragment extends Fragment {
         rejectedObjectedStr = objectedRejected.getText().toString();
         disputedVotes = disputed.getText().toString();
         validVotesStr = total;
+        int rejecBal, objRej, dispuV = 0;
+        rejecBal = Integer.parseInt(rejectedBallotPapersStr);
+        objRej = Integer.parseInt(rejectedObjectedStr);
+        dispuV = Integer.parseInt(disputedVotes);
+        int spoiltTotal = rejecBal + objRej + dispuV;
+        final String spoiltKura = String.valueOf(spoiltTotal);
+
 
 
         if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty() && !total.isEmpty()) {
@@ -575,14 +582,47 @@ public class MainFragment extends Fragment {
             Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardName + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
             final String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View view = inflater.inflate(R.layout.checkboxes, null);
+            builder.setView(view);
+            final EditText raila, uhuru, registered, rejectedBallot, rejectedObjected, disputed, validCast;
+
+            raila = (EditText) view.findViewById(R.id.raila_total);
+            uhuru = (EditText) view.findViewById(R.id.uhuru_total);
+            registered = (EditText) view.findViewById(R.id.spoilt_votes);
+            rejectedBallot = (EditText) view.findViewById(R.id.rejected_ballot);
+            rejectedObjected = (EditText) view.findViewById(R.id.objected_rejected);
+            disputed = (EditText) view.findViewById(R.id.disputed_votes);
+            validCast = (EditText) view.findViewById(R.id.total_votes);
+
+            raila.setText(railaStr);
+            uhuru.setText(uhuruStr);
+            registered.setText(registerdVoters);
+            rejectedBallot.setText(rejectedBallotPapersStr);
+            rejectedObjected.setText(rejectedObjectedStr);
+            disputed.setText(disputedVotes);
+            validCast.setText(validVotesStr);
+
+            raila.setEnabled(false);
+            uhuru.setEnabled(false);
+            registered.setEnabled(false);
+            rejectedBallot.setEnabled(false);
+            rejectedObjected.setEnabled(false);
+            disputed.setEnabled(false);
+            validCast.setEnabled(false);
+
             builder.setTitle("Post data");
             builder.setMessage("Confirm posting of the data as it is");
+
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
+
                     pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
 
-                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltVotesStr, total);
+                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, String.valueOf(new Date()));
 
                     pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
                             rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
@@ -595,6 +635,7 @@ public class MainFragment extends Fragment {
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    buttonSubmit.setEnabled(true);
                     dialog.dismiss();
                 }
             });
@@ -800,7 +841,8 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total) {
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total,
+                                final String timeOnDevice) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -822,6 +864,7 @@ public class MainFragment extends Fragment {
                 params.put("uhuru", uhuruStr);
                 params.put("spoilt_votes", spoiltVotesStr);
                 params.put("total", total);
+                params.put("time_on_device", timeOnDevice);
                 return params;
             }
         };

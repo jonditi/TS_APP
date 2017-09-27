@@ -2,6 +2,7 @@ package com.pathways_international.ts.ui.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.provider.Telephony;
 import android.util.Log;
 
 /**
@@ -55,5 +56,7 @@ public class SessionManager {
     public void setMessage(String message) {
         editor.putString("message", message);
         editor.apply();
+
+        Log.d(TAG, "message set");
     }
 }
