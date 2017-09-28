@@ -81,7 +81,7 @@ public class VerifyKey extends AppCompatActivity {
         SmsBroadcastReceiver.bindListener(new SmsListener() {
             @Override
             public void messageReceived(String messageText) {
-                Log.d("FUckingggdfdfdf", "SHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHIIIIIIIIIIIIIIII" + messageText);
+                Log.d("SmsBroacastReceiver", messageText);
                 verificationEdit.setText(messageText);
 
             }
@@ -160,6 +160,12 @@ public class VerifyKey extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(smsBroadcastReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(smsBroadcastReceiver);
     }
 
     private void verifyKeyOnline(final String key) {

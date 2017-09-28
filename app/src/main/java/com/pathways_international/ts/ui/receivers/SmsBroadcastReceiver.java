@@ -73,11 +73,8 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     if (sender.contains(phone.substring(1))) {
                         Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
                         Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
-
+                        smsListener.messageReceived(smsBody);
                     }
-
-                    smsListener.messageReceived(smsBody);
-
 
                 }
             }
