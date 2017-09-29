@@ -49,6 +49,10 @@ import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
+import com.vansuita.pickimage.bean.PickResult;
+import com.vansuita.pickimage.bundle.PickSetup;
+import com.vansuita.pickimage.dialog.PickImageDialog;
+import com.vansuita.pickimage.listeners.IPickResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,7 +80,7 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements IPickResult {
     private static final String LOG_TAG = MainFragment.class.getSimpleName();
     @BindView(R.id.county)
     AutoCompleteTextView edCounty;
@@ -669,7 +673,8 @@ public class MainFragment extends Fragment {
         if (pollStStr.isEmpty()) {
             Toast.makeText(getContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
         } else {
-            startChooser();
+//            startChooser();
+            PickImageDialog.build(new PickSetup()).show(getFragmentManager());
         }
 
     }
@@ -1030,4 +1035,14 @@ public class MainFragment extends Fragment {
     }
 
 
+    @Override
+    public void onPickResult(PickResult pickResult) {
+        if (pickResult.getError() == null) {
+            imageViewContainer.setImageBitmap(pickResult.getBitmap());
+
+            bitmap = pickResult.getBitmap();
+
+            buttonSubmit.setEnabled(true);
+        }
+    }
 }

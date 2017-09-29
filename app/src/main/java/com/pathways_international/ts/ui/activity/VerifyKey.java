@@ -165,7 +165,7 @@ public class VerifyKey extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(smsBroadcastReceiver);
+//        unregisterReceiver(smsBroadcastReceiver);
     }
 
     private void verifyKeyOnline(final String key) {

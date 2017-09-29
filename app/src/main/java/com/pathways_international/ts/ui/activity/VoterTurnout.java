@@ -200,7 +200,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         });
 
 
-        imagePicker.setCropImage(true);
+        imagePicker.setCropImage(false);
     }
 
     @OnClick(R.id.imageview_container)
@@ -209,9 +209,9 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         if (pollStStr.isEmpty()) {
             Toast.makeText(VoterTurnout.this, "Select a poll station first", Toast.LENGTH_SHORT).show();
         } else {
-            startChooser();
+//            startChooser();
             // To remove image cropping
-//            PickImageDialog.build(new PickSetup()).show(this);
+            PickImageDialog.build(new PickSetup()).show(this);
         }
 
     }
@@ -325,7 +325,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
                 Locale.getDefault()).format(new Date());
         pDialog.setMessage("Uploading...");
-        showDialog();
+        pDialog.show();
         Log.d("Image upload", "started");
         StringRequest request = new StringRequest(Request.Method.POST, Urls.UPLOAD_TURNOUT_IMAGE,
                 new Response.Listener<String>() {

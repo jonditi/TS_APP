@@ -226,7 +226,7 @@ public class Login extends AppCompatActivity {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, verificationKey, null, null);
             Log.d(LOG_TAG, phoneNumber + " " + verificationKey + " Message sent");
-            session.setMessage(verificationKey);
+//            session.setMessage(verificationKey);
 
 
         } catch (Exception e) {
