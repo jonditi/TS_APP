@@ -106,9 +106,9 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
                     smsListener.messageReceived(smsBody);
                 }
-                Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
-                Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
-                smsListener.messageReceived(smsBody);
+//                Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+//                Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
+//                smsListener.messageReceived(smsBody);
 
             }
 
