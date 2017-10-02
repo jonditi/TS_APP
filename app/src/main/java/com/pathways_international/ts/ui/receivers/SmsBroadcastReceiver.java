@@ -44,39 +44,72 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             String smsBody = "";
             String sender = "";
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
-                    sender = smsMessage.getDisplayOriginatingAddress();
-                    smsBody += smsMessage.getMessageBody();
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
+//                    sender = smsMessage.getDisplayOriginatingAddress();
+//                    smsBody += smsMessage.getMessageBody();
+//                }
+//            } else {
+//                if (bundle != null) {
+//                    Object[] pdus = (Object[]) bundle.get(SMS_BUNDLE);
+//                    if (pdus == null) {
+//                        // Display some error to the user
+//                        Log.e(SmsBroadcastReceiver.class.getSimpleName(), "SmsBundle had no pdus key");
+//                        return;
+//                    }
+//
+//                    SmsMessage[] messages = new SmsMessage[pdus.length];
+//                    for (int i = 0; i < messages.length; i++) {
+//                        messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+//                        smsBody += messages[i].getMessageBody();
+//                    }
+//                    sender = messages[0].getOriginatingAddress();
+//                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+//                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), smsBody);
+//                    sessionManager.setMessage(smsBody);
+//                    Intent smsBodyIntent = new Intent("verificationKey");
+//                    smsBodyIntent.putExtra("verification_key", smsBody);
+//                    LocalBroadcastManager.getInstance(context).sendBroadcast(smsBodyIntent);
+//                    if (sender.contains(phone.substring(1))) {
+//                        Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+//                        Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
+//                        smsListener.messageReceived(smsBody);
+//                    }
+//                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+//                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
+//                    smsListener.messageReceived(smsBody);
+//
+//                }
+//            }
+            if (bundle != null) {
+                Object[] pdus = (Object[]) bundle.get(SMS_BUNDLE);
+                if (pdus == null) {
+                    // Display some error to the user
+                    Log.e(SmsBroadcastReceiver.class.getSimpleName(), "SmsBundle had no pdus key");
+                    return;
                 }
-            } else {
-                if (bundle != null) {
-                    Object[] pdus = (Object[]) bundle.get(SMS_BUNDLE);
-                    if (pdus == null) {
-                        // Display some error to the user
-                        Log.e(SmsBroadcastReceiver.class.getSimpleName(), "SmsBundle had no pdus key");
-                        return;
-                    }
 
-                    SmsMessage[] messages = new SmsMessage[pdus.length];
-                    for (int i = 0; i < messages.length; i++) {
-                        messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                        smsBody += messages[i].getMessageBody();
-                    }
-                    sender = messages[0].getOriginatingAddress();
+                SmsMessage[] messages = new SmsMessage[pdus.length];
+                for (int i = 0; i < messages.length; i++) {
+                    messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                    smsBody += messages[i].getMessageBody();
+                }
+                sender = messages[0].getOriginatingAddress();
+                Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+                Log.d(SmsBroadcastReceiver.class.getSimpleName(), smsBody);
+                sessionManager.setMessage(smsBody);
+                Intent smsBodyIntent = new Intent("verificationKey");
+                smsBodyIntent.putExtra("verification_key", smsBody);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(smsBodyIntent);
+                if (sender.contains(phone.substring(1))) {
                     Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
-                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), smsBody);
-                    sessionManager.setMessage(smsBody);
-                    Intent smsBodyIntent = new Intent("verificationKey");
-                    smsBodyIntent.putExtra("verification_key", smsBody);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(smsBodyIntent);
-                    if (sender.contains(phone.substring(1))) {
-                        Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
-                        Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
-                        smsListener.messageReceived(smsBody);
-                    }
-
+                    Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
+                    smsListener.messageReceived(smsBody);
                 }
+                Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
+                Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);
+                smsListener.messageReceived(smsBody);
+
             }
 
             if (sender.contains(phone)) {
