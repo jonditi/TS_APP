@@ -546,10 +546,10 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
                     pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
 
-                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, getDateTime());
+                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, String.valueOf(new Date()));
 
                     pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
-                            rejectedObjectedStr, disputedVotes, validVotesStr, getDateTime());
+                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
                     uploadImageClient(iD);
                     candidatesView.setVisibility(View.GONE);
@@ -650,6 +650,8 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
                         // Clear the spinner
                         streamSpinner.setAdapter(null);
+                        loadPollStreamsRemote(pollStStr);
+
 
                     }
                 }, new Response.ErrorListener() {
