@@ -70,6 +70,10 @@ public class VerifyKey extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify_key);
         ButterKnife.bind(this);
+
+        // User should not enter the key manually
+        // if it failed the first time, then can login again.
+        verificationEdit.setEnabled(false);
         smsBroadcastReceiver.setListener(new SmsBroadcastReceiver.Listener() {
             @Override
             public void onSmsReceived(String textMessage) {
