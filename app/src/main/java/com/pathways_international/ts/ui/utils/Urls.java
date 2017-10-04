@@ -8,7 +8,7 @@ public class Urls {
     // Default config for real devices
     private static String baseUrl =
             // ip of your machine
-            "http://fundilistapp.com/ts/";
+            "https://fundilistapp.com/ts/";
 
     private static String localBaseUrl = "http://192.168.100.7/ts-login/";
     // Server patient login url
