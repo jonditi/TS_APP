@@ -20,7 +20,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     // Database Name
     private static final String DATABASE_NAME = "top_secret";
@@ -31,6 +31,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     //  table two
     private static final String TABLE_TWO = "two";
+    private static final String TABLE_TWO_DEV = "table_two_dev";
+    private static final String TABLE_UPLOADS = "uploads";
 
     // Login table name
     private static final String TABLE_USER = "user";
@@ -43,14 +45,17 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     // Column names
     private static final String KEY_ID = "id";
-    private static final String KEY_COUNTY = "county";
-    private static final String KEY_CONSTITUENCY = "constituency";
-    private static final String KEY_WARD = "ward";
+    private static final String KEY_COUNTY = "county_name";
+    private static final String KEY_CONSTITUENCY = "constituency_name";
+    private static final String KEY_WARD = "ward_name";
     private static final String KEY_POLL_STATION = "poll_station";
+    private static final String KEY_POLL_CENTER = "poll_center";
+    private static final String KEY_STREAM = "stream";
     private static final String KEY_POLL_STATION_ID = "poll_station_id";
     private static final String KEY_NUM_ONE = "num_one";
     private static final String KEY_NUM_TWO = "num_two";
     private static final String KEY_SEAT = "seat";
+    private static final String KEY_STATUS = "status";
 
     // Login Table Columns names
     private static final String KEY_FIRST_NAME = "first_name";
@@ -65,6 +70,20 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_WARD_CODE = "ward_code";
     private static final String KEY_CREATED_AT = "created_at";
 
+    // Uploads table columns
+    private static final String IMAGE = "image";
+    private static final String CREATED_AT = "created_at";
+
+    // table two
+    private static final String RAILA = "raila";
+    private static final String UHURU = "uhuru";
+    private static final String REGISTERED_VOTERS = "registered_voters";
+    private static final String REJECTED_BALLOT = "rejected_ballot_papers";
+    private static final String REJECTED_OBJECTED = "rejected_objected";
+    private static final String DISPUTED_VOTES = "disputed_votes";
+    private static final String VALID_VOTES = "valid_votes_cast";
+    private static final String TIME_ON_DEVICE = "time_on_device";
+
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -74,7 +93,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_ONE = "CREATE TABLE IF NOT EXISTS " + TABLE_ONE + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_COUNTY + " TEXT,"
                 + KEY_CONSTITUENCY + " TEXT," + KEY_WARD + " TEXT,"
-                + KEY_POLL_STATION + " TEXT" + ")";
+                + KEY_STATUS + " TEXT," + KEY_STREAM + " TEXT,"
+                + KEY_POLL_CENTER + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_ONE);
 
         String CREATE_TABLE_CONSTITUENCIES = "CREATE TABLE IF NOT EXISTS " + TABLE_CONSTITUENCIES + "("
@@ -106,7 +126,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_POLL_STATION + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_LOC);
 
-        String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
+        String CREATE_LOGIN_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_USER + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_FIRST_NAME + " TEXT,"
                 + KEY_LAST_NAME + " TEXT," + KEY_ID_NUMBER + " TEXT UNIQUE,"
                 + KEY_PHONE + " TEXT,"
@@ -114,6 +134,20 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_WARD_NAME + " TEXT," + KEY_WARD_CODE + " TEXT,"
                 + KEY_CREATED_AT + " TEXT" + ")";
         db.execSQL(CREATE_LOGIN_TABLE);
+
+        String CREATE_TABLE_TWO_DEV = "CREATE TABLE IF NOT EXISTS " + TABLE_TWO_DEV + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_POLL_STATION_ID + " TEXT,"
+                + RAILA + " TEXT," + UHURU + " TEXT," + REGISTERED_VOTERS + " TEXT,"
+                + REJECTED_BALLOT + " TEXT," + REJECTED_OBJECTED + " TEXT,"
+                + DISPUTED_VOTES + " TEXT," + VALID_VOTES + " TEXT,"
+                + KEY_STATUS + " TEXT," + TIME_ON_DEVICE + " TEXT"
+                + ")";
+        db.execSQL(CREATE_TABLE_TWO_DEV);
+
+        String CREATE_TABLE_UPLOADS = "CREATE TABLE IF NOT EXISTS " + TABLE_UPLOADS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + IMAGE + " VARCHAR,"
+                + KEY_STATUS + " TEXT" + ")";
+        db.execSQL(CREATE_TABLE_UPLOADS);
 
 
     }
@@ -127,6 +161,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_WARDS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_POLL_STATIONS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TWO_DEV);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_UPLOADS);
 
         onCreate(db);
     }
@@ -169,14 +205,15 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Log.d(TAG, "Deleted all user info from sqlite");
     }
 
-    public void addToTableOne(String county, String constituency, String ward, String pollStation) {
+    public void addToTableOne(String county, String constituency, String ward, String pollCenter, String stream) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_COUNTY, county);
-        values.put(KEY_CONSTITUENCY, constituency);
+        values.put(KEY_POLL_CENTER, pollCenter);
         values.put(KEY_WARD, ward);
-        values.put(KEY_POLL_STATION, pollStation);
+        values.put(KEY_CONSTITUENCY, constituency);
+        values.put(KEY_COUNTY, county);
+        values.put(KEY_STREAM, stream);
 
         long id = db.insert(TABLE_ONE, null, values);
         Log.d(TAG, "Data inserted in table one:" + id);
@@ -195,6 +232,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         long id = db.insert(TABLE_TWO, null, values);
 
         Log.d(TAG, "Data inserted in table two:" + id);
+    }
+
+    public void addToTableTwoDev(String pollStatioId, String raila, String uhuru, String registeredVoters, String rejectedBallotPapers,
+                                 String rejectedObjected, String disputedVotes, String validVotes, String timeOnDevice, String status) {
+        SQLiteDatabase database = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        // TODO: Finish this tomorrow. Issa weekend
     }
 
     public void addToLoc(String county, String pollStId, String constituency, String ward, String pollStation) {
