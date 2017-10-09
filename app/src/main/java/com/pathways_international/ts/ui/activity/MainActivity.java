@@ -70,6 +70,8 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity implements IPickResult {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final int NAME_SYNCED_WITH_SERVER = 1;
+    public static final int NAME_NOT_SYNCED_WITH_SERVER = 0;
 
     @BindView(R.id.county)
     AutoCompleteTextView edCounty;
@@ -542,6 +544,12 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
+                    sqLiteHandler.addToTableOne(countyStr, constName, wardName, pollStStr, streamStr, NAME_NOT_SYNCED_WITH_SERVER);
+                    sqLiteHandler.addToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr, rejectedObjectedStr, disputedVotes,
+                            validVotesStr, String.valueOf(new Date()), NAME_NOT_SYNCED_WITH_SERVER);
+
+                    sqLiteHandler.insertIntoUploads(getStringImage(bitmap), iD, NAME_NOT_SYNCED_WITH_SERVER);
 
 
                     pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);

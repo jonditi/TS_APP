@@ -93,7 +93,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_ONE = "CREATE TABLE IF NOT EXISTS " + TABLE_ONE + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_COUNTY + " TEXT,"
                 + KEY_CONSTITUENCY + " TEXT," + KEY_WARD + " TEXT,"
-                + KEY_STATUS + " TEXT," + KEY_STREAM + " TEXT,"
+                + KEY_STATUS + " TINYINT," + KEY_STREAM + " TEXT,"
                 + KEY_POLL_CENTER + " TEXT" + ")";
         db.execSQL(CREATE_TABLE_ONE);
 
@@ -140,13 +140,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + RAILA + " TEXT," + UHURU + " TEXT," + REGISTERED_VOTERS + " TEXT,"
                 + REJECTED_BALLOT + " TEXT," + REJECTED_OBJECTED + " TEXT,"
                 + DISPUTED_VOTES + " TEXT," + VALID_VOTES + " TEXT,"
-                + KEY_STATUS + " TEXT," + TIME_ON_DEVICE + " TEXT"
+                + KEY_STATUS + " TINYINT," + TIME_ON_DEVICE + " TEXT"
                 + ")";
         db.execSQL(CREATE_TABLE_TWO_DEV);
 
         String CREATE_TABLE_UPLOADS = "CREATE TABLE IF NOT EXISTS " + TABLE_UPLOADS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + IMAGE + " VARCHAR,"
-                + KEY_STATUS + " TEXT" + ")";
+                + KEY_POLL_STATION_ID + " TEXT,"
+                + KEY_STATUS + " TINYINT" + ")";
         db.execSQL(CREATE_TABLE_UPLOADS);
 
 
@@ -205,7 +206,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Log.d(TAG, "Deleted all user info from sqlite");
     }
 
-    public void addToTableOne(String county, String constituency, String ward, String pollCenter, String stream) {
+    public void addToTableOne(String county, String constituency, String ward, String pollCenter, String stream, int status) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -214,8 +215,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_CONSTITUENCY, constituency);
         values.put(KEY_COUNTY, county);
         values.put(KEY_STREAM, stream);
+        values.put(KEY_STATUS, status);
 
         long id = db.insert(TABLE_ONE, null, values);
+        db.close();
         Log.d(TAG, "Data inserted in table one:" + id);
     }
 
@@ -230,16 +233,56 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_SEAT, seat);
 
         long id = db.insert(TABLE_TWO, null, values);
-
+        db.close();
         Log.d(TAG, "Data inserted in table two:" + id);
     }
 
     public void addToTableTwoDev(String pollStatioId, String raila, String uhuru, String registeredVoters, String rejectedBallotPapers,
-                                 String rejectedObjected, String disputedVotes, String validVotes, String timeOnDevice, String status) {
+                                 String rejectedObjected, String disputedVotes, String validVotes, String timeOnDevice, int status) {
         SQLiteDatabase database = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
-        // TODO: Finish this tomorrow. Issa weekend
+        contentValues.put(KEY_POLL_STATION_ID, pollStatioId);
+        contentValues.put(RAILA, raila);
+        contentValues.put(UHURU, uhuru);
+        contentValues.put(REGISTERED_VOTERS, registeredVoters);
+        contentValues.put(REJECTED_BALLOT, rejectedBallotPapers);
+        contentValues.put(REJECTED_OBJECTED, rejectedObjected);
+        contentValues.put(DISPUTED_VOTES, disputedVotes);
+        contentValues.put(VALID_VOTES, validVotes);
+        contentValues.put(TIME_ON_DEVICE, timeOnDevice);
+        contentValues.put(KEY_STATUS, status);
+
+        long id = database.insert(TABLE_TWO_DEV, null, contentValues);
+        database.close();
+        Log.d(TAG, "Data inserted into table two dev: " + id);
+    }
+
+    public void clearTableTwoDev() {
+        SQLiteDatabase database = this.getWritableDatabase();
+        database.delete(TABLE_TWO_DEV, null, null);
+        database.close();
+    }
+
+    public void insertIntoUploads(String image, String pollStationId, int status) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(IMAGE, image);
+        values.put(KEY_POLL_STATION_ID, pollStationId);
+        values.put(KEY_STATUS, status);
+
+        long id = db.insert(TABLE_UPLOADS, null, values);
+        db.close();
+        Log.d(TAG, "Data inserted into uploads: " + id);
+    }
+
+    public void deleteUploads() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_UPLOADS, null, null);
+
+        db.close();
     }
 
     public void addToLoc(String county, String pollStId, String constituency, String ward, String pollStation) {
@@ -253,6 +296,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_POLL_STATION, pollStation);
 
         long id = db.insert(TABLE_LOC, null, values);
+        db.close();
         Log.d(TAG, "Data inserted in table one:" + id);
     }
 
@@ -263,6 +307,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_CONSTITUENCY, constituency);
 
         long id = db.insert(TABLE_CONSTITUENCIES, null, values);
+        db.close();
         Log.d(TAG, "Constituency inserted:" + id);
     }
 
@@ -279,6 +324,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_WARD, ward);
 
         long id = db.insert(TABLE_WARDS, null, values);
+        db.close();
         Log.d(TAG, "ward inserted:" + id);
     }
 
@@ -296,7 +342,80 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_POLL_STATION_ID, pollStationId);
 
         long id = db.insert(TABLE_CONSTITUENCIES, null, values);
+        db.close();
         Log.d(TAG, "PollStation inserted:" + id);
+    }
+
+    public boolean updateTableTwoStatus(int id, int status) {
+        SQLiteDatabase database = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(KEY_STATUS, status);
+        database.update(TABLE_TWO_DEV, contentValues, "id =" + id, null);
+        database.close();
+        return true;
+    }
+
+    public boolean updateUploadsStatus(int id, int status) {
+        SQLiteDatabase database = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(KEY_STATUS, status);
+        database.update(TABLE_UPLOADS, contentValues, "id =" + id, null);
+        database.close();
+        return true;
+    }
+
+    public boolean updateTableOneStatus(int id, int status) {
+        SQLiteDatabase database = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(KEY_STATUS, status);
+        database.update(TABLE_ONE, contentValues, "id =" + id, null);
+        database.close();
+        return true;
+    }
+
+    /**
+     * Get a cursor un-synced values so that they can be synced with
+     * the server when there is network connectivity
+     *
+     * @return cursor
+     */
+    public Cursor getUnsyncedTableTwoDev() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + TABLE_TWO_DEV + " WHERE " + KEY_STATUS + " = 0;";
+        Cursor cursor = db.rawQuery(sql, null);
+        cursor.close();
+        return cursor;
+    }
+
+    /**
+     * Get a cursor for un-synced uploads table values so that
+     * they can be synced with the server
+     *
+     * @return cursor
+     */
+    public Cursor getUnsyncedUploads() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + TABLE_UPLOADS + " WHERE " + KEY_STATUS + " = 0;";
+        Cursor cursor = db.rawQuery(sql, null);
+        cursor.close();
+        return cursor;
+    }
+
+    /**
+     * Get a cursor for un-synced table one values
+     * so that they may be synced with the server
+     *
+     * @return cursor
+     */
+    public Cursor getUnSyncedTableOne() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + TABLE_ONE + " WHERE " + KEY_STATUS + " = 0;";
+        Cursor cursor = db.rawQuery(sql, null);
+        cursor.close();
+        return cursor;
     }
 
     public void deletePollSt() {
@@ -371,7 +490,6 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 int countyIndex = cursor.getColumnIndex("county");
                 String county = cursor.getString(countyIndex);
                 countyList.add(county);
-//
             } while (cursor.moveToNext());
         }
         cursor.close();
