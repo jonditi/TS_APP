@@ -3,14 +3,19 @@ package com.pathways_international.ts.ui.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
@@ -24,7 +29,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,16 +40,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.pathways_international.ts.R;
-import com.pathways_international.ts.ui.adapter.ConstituencyAutoCompleteAdapter;
-import com.pathways_international.ts.ui.adapter.CountyAutoCompleteAdapter;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
+import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
 import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
+import com.vansuita.pickimage.bean.PickResult;
+import com.vansuita.pickimage.bundle.PickSetup;
+import com.vansuita.pickimage.dialog.PickImageDialog;
+import com.vansuita.pickimage.listeners.IPickResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +80,7 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements IPickResult {
     private static final String LOG_TAG = MainFragment.class.getSimpleName();
     @BindView(R.id.county)
     AutoCompleteTextView edCounty;
@@ -87,43 +95,22 @@ public class MainFragment extends Fragment {
     @BindView(R.id.imageview_container)
     ImageView imageViewContainer;
 
-    @BindView(R.id.raila_text)
-    TextView railaText;
-    @BindView(R.id.uhuru_text)
-    TextView uhuruText;
-    @BindView(R.id.dida_text)
-    TextView didaText;
-    @BindView(R.id.nyagah_text)
-    TextView nyagahText;
-    @BindView(R.id.jirongo_text)
-    TextView jirongoText;
-    @BindView(R.id.aukot_text)
-    TextView aukotText;
-    @BindView(R.id.mwaura_text)
-    TextView mwauraText;
-    @BindView(R.id.kaluyu_text)
-    TextView kaluyuText;
-
-
     @BindView(R.id.raila_total)
     EditText railaTotal;
-    @BindView(R.id.aukot_total)
-    EditText aukotTotal;
 
-    @BindView(R.id.jirongo_total)
-    EditText jirongoTotal;
-    @BindView(R.id.nyagah_total)
-    EditText nyagahTotal;
 
     @BindView(R.id.uhuru_total)
     EditText uhuruTotal;
-    @BindView(R.id.dida_total)
-    EditText didaTotal;
-
-    @BindView(R.id.kaluyu_total)
-    EditText kaluyuTotal;
-    @BindView(R.id.mwaura_total)
-    EditText mwauraTotal;
+    @BindView(R.id.spoilt_votes)
+    EditText spoiltVotes;
+    @BindView(R.id.total_votes)
+    EditText totalVotes;
+    @BindView(R.id.rejected_ballot)
+    EditText rejectedBallot;
+    @BindView(R.id.objected_rejected)
+    EditText objectedRejected;
+    @BindView(R.id.disputed_votes)
+    EditText disputed;
 
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
@@ -133,13 +120,22 @@ public class MainFragment extends Fragment {
     Spinner wardSpinner;
     @BindView(R.id.poll_spinner)
     Spinner pollSpinner;
+    @BindView(R.id.stream_spinner)
+    Spinner streamSpinner;
     @BindView(R.id.image_name)
     TextView imageName;
+    @BindView(R.id.page_title)
+    TextView pageTitle;
 
     @BindView(R.id.candidates_view)
-    RelativeLayout candidatesView;
+    LinearLayout candidatesView;
 
-    String railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr;
+    String railaStr, uhuruStr, spoiltVotesStr, total;
+    String registerdVoters;
+    String rejectedBallotPapersStr;
+    String rejectedObjectedStr;
+    String disputedVotes;
+    String validVotesStr;
 
     Bitmap bitmap;
 
@@ -147,21 +143,24 @@ public class MainFragment extends Fragment {
     private ImagePicker imagePicker = new ImagePicker();
 
     private SQLiteHandler sqLiteHandler;
+    private SessionManager sessionManager;
 
 
-    String countyStr, constStr, wardStr, pollStStr = "";
+    String countyStr, streamStr = "";
+    String pollStStr = "";
 
 //    Spinner seatSpinner;
 
     String pollStId;
 
-    ArrayAdapter<String> countyAdapter, constAdapter, wardAdapter, pollAdapter;
+    ArrayAdapter<String> countyAdapter, constAdapter, wardAdapter, pollAdapter, pollStreamAdapter;
     LocationSharedPrefs locationsPreference;
     List<LocationModel> countyModelList = new ArrayList<>();
     List<LocationModel> locationModelList = new ArrayList<>();
     ArrayList<String> cosntituencies = new ArrayList<>();
     ArrayList<String> wardsList = new ArrayList<>();
     ArrayList<String> pollStationList = new ArrayList<>();
+    ArrayList<String> pollStationStreamList = new ArrayList<>();
     ArrayList<String> pollStationId = new ArrayList<>();
     Boolean requestedStarted = false;
 
@@ -170,6 +169,8 @@ public class MainFragment extends Fragment {
     Activity parentActivity;
 
     boolean isInitialDisplay = true;
+
+    String constName, constCode, wardName, wardCode;
 
 
     public MainFragment() {
@@ -181,85 +182,61 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
-
-//        seatSpinner = (Spinner) getActivity().findViewById(R.id.seat_spinner);
 
         locationsPreference = new LocationSharedPrefs(getActivity());
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
-        if (pollStStr.isEmpty()) {
+        if (bitmap == null) {
             candidatesView.setVisibility(View.GONE);
             buttonSubmit.setEnabled(false);
         }
 
         sqLiteHandler = new SQLiteHandler(getContext());
+        sessionManager = new SessionManager(getContext());
 
-        countySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isInitialDisplay) {
-                    isInitialDisplay = false;
-                } else {
-                    countyStr = parent.getItemAtPosition(position).toString();
-                    if (countyStr.contains(" ")) {
-                        Log.d(LOG_TAG, "Spacesssssssssssssssssssssssssss");
-                    }
-                    loadConstituencies(countyStr);
+        if (sessionManager.isLoggedIn()) {
+            HashMap<String, String> user = sqLiteHandler.getUserDetails();
+            constCode = user.get("constituency_code");
+            constName = user.get("constituency_name");
+            wardName = user.get("ward_name");
+            wardCode = user.get("ward_code");
 
-                }
+            Log.d(LOG_TAG, constName + "||" + wardName);
 
+            pageTitle.setText(getString(R.string.ward) + ": " + wardName);
+
+
+            if (pollStationList != null && pollStationList.isEmpty() && pollStationList.size() == 0) {
+                loadPollStationsRemote(wardName);
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
-
-        constituencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                constStr = parent.getItemAtPosition(position).toString();
-                loadWardsRemote(constStr);
-
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        wardSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                wardStr = parent.getItemAtPosition(position).toString();
-                Log.d(LOG_TAG, wardStr);
-                loadPollStationsRemote(wardStr);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        }
 
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pollStStr = parent.getItemAtPosition(position).toString();
+                loadPollStreamsRemote(pollStStr);
 
-                if (candidatesView.getVisibility() == View.GONE) {
-                    candidatesView.setVisibility(View.VISIBLE);
-                }
+            }
 
-                String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        streamSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                streamStr = parent.getItemAtPosition(position).toString();
+                String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+
                 imageName.setText(iD);
-                buttonSubmit.setEnabled(true);
             }
 
             @Override
@@ -276,10 +253,98 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().length() > 0) {
-                    railaStr = s.toString();
-                    Log.d(LOG_TAG, railaStr);
-                }
+//                if (railaTotal.getText().toString().isEmpty()) {
+//                    railaTotal.setText("0");
+//                }
+//
+//                if (!uhuruTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
+//                    int raila = Integer.parseInt(railaTotal.getText().toString());
+//                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+////                    if (!s.toString().isEmpty()) {
+////                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+////                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+////                    }
+//
+//
+//                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+////                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        uhuruTotal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (uhuruTotal.getText().toString().isEmpty()) {
+//                    uhuruTotal.setText("0");
+//
+//                }
+//
+//                if (!railaTotal.getText().toString().isEmpty() && !spoiltVotes.getText().toString().isEmpty()) {
+//                    int raila = Integer.parseInt(railaTotal.getText().toString());
+//                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+////                    if (!s.toString().isEmpty()) {
+////                        int spoilt = Integer.parseInt(spoiltVotes.getText().toString());
+////                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+////                    }
+////
+////
+////                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+//////                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+////                    }
+//                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        spoiltVotes.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (railaTotal.getText().toString().isEmpty()) {
+//                    railaTotal.setText("0");
+//                }
+//                if (uhuruTotal.getText().toString().isEmpty()) {
+//                    uhuruTotal.setText("0");
+//                }
+//                if (spoiltVotes.getText().toString().isEmpty()) {
+//                    spoiltVotes.setText("0");
+//                }
+////                if (!railaTotal.getText().toString().isEmpty() && !uhuruTotal.getText().toString().isEmpty()) {
+////                    int raila = Integer.parseInt(railaTotal.getText().toString());
+////                    int uhuru = Integer.parseInt(uhuruTotal.getText().toString());
+////                    if (!s.toString().isEmpty()) {
+////                        int spoilt = Integer.parseInt(s.toString());
+////                        totalVotes.setText(String.valueOf(raila + uhuru + spoilt));
+////                    }
+////
+////
+////                    if (Integer.parseInt(totalVotes.getText().toString()) > 700) {
+//////                        Toast.makeText(getContext(), "Total cannot exceed 700", Toast.LENGTH_SHORT).show();
+////                    }
+////                }
+
+
             }
 
             @Override
@@ -360,6 +425,7 @@ public class MainFragment extends Fragment {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String ward = obj.getString("ward");
+                            countyStr = obj.getString("county");
                             wardsList.add(ward);
                         }
 
@@ -383,7 +449,7 @@ public class MainFragment extends Fragment {
 
     private void loadPollStationsRemote(String wardStr) {
         pDialog.setMessage("Loading poll stations");
-        pDialog.dismiss();
+        pDialog.show();
         wardStr = wardStr.replace(" ", "%20");
         Log.d(LOG_TAG, wardStr);
         StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STATION + wardStr, new Response.Listener<String>() {
@@ -394,9 +460,9 @@ public class MainFragment extends Fragment {
                     pollStationList.clear();
 
                 }
-                if (pollStationId.size() > 0) {
-                    pollStationId.clear();
-                }
+//                if (pollStationId.size() > 0) {
+//                    pollStationId.clear();
+//                }
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray jsonArray = jsonObject.getJSONArray("location");
@@ -405,8 +471,12 @@ public class MainFragment extends Fragment {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String ward = obj.getString("poll_station");
                             String id = obj.getString("id");
-                            pollStationId.add(id);
-                            pollStationList.add(ward);
+                            if (!pollStationList.contains(ward)) {
+//                                pollStationId.add(id);
+                                pollStationList.add(ward);
+                            }
+                            countyStr = obj.getString("county");
+
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
@@ -428,152 +498,53 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
+    private void loadPollStreamsRemote(String pollStStr) {
+        pDialog.setMessage("Loading streams stations");
+        pDialog.dismiss();
+        pollStStr = pollStStr.replace(" ", "%20");
+        Log.d(LOG_TAG, pollStStr);
+        StringRequest request = new StringRequest(Request.Method.GET, Urls.POLL_STREAM + pollStStr, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                pDialog.dismiss();
+                Log.d("Streams", response);
+                if (pollStationStreamList.size() > 0) {
+                    pollStationStreamList.clear();
 
-    @OnClick(R.id.submit_button)
-    void submitButton() {
-        railaStr = railaTotal.getText().toString();
-        uhuruStr = uhuruTotal.getText().toString();
-        didaStr = didaTotal.getText().toString();
-        nyagahStr = nyagahTotal.getText().toString();
-        jirongoStr = jirongoTotal.getText().toString();
-        aukotStr = aukotTotal.getText().toString();
-        mwauraStr = mwauraTotal.getText().toString();
-        kaluyuStr = kaluyuTotal.getText().toString();
-
-        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !didaStr.isEmpty() && !nyagahStr.isEmpty() && !jirongoStr.isEmpty() && !aukotStr.isEmpty()
-                && !mwauraStr.isEmpty() && !kaluyuStr.isEmpty()) {
-            Log.d(LOG_TAG, countyStr + "||" + constStr + "||" + wardStr + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + didaStr);
-//            String seat = String.valueOf(seatSpinner.getSelectedItem());
-            String iD = pollStationId.get(pollStationList.indexOf(pollSpinner.getSelectedItem().toString()));
-
-//          sqLiteHandler.addToTableOne(countyStr, constStr, wardStr, pollStStr);
-//          sqLiteHandler.addToTableTwo(pollStId, railaStr, uhuruStr, seat);
-            pushToTabeleOne(countyStr, constStr, wardStr, pollStStr);
-            pushToTableTwo(iD, railaStr, uhuruStr, didaStr, nyagahStr, jirongoStr, aukotStr, mwauraStr, kaluyuStr);
-            uploadImageClient(iD);
-//            Log.d(LOG_TAG, " Seat Spinner val: " + seat);
-//            Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-        } else {
-            railaTotal.setError("Please fill in this field");
-            uhuruTotal.setError("Please fill in this field");
-            didaTotal.setError("Please fill in this field");
-            nyagahTotal.setError("Please fill in this field");
-            jirongoTotal.setError("Please fill in this field");
-            aukotTotal.setError("Please fill in this field");
-            mwauraTotal.setError("Please fill in this field");
-            kaluyuTotal.setError("Please fill in this field");
-        }
-
-        edCounty.setText("");
-        edConstituency.setText("");
-        edWard.setText("");
-        edPollStation.setText("");
-        railaTotal.setText("");
-        uhuruTotal.setText("");
-        didaTotal.setText("");
-        nyagahTotal.setText("");
-        jirongoTotal.setText("");
-        mwauraTotal.setText("");
-        kaluyuTotal.setText("");
-        aukotTotal.setText("");
-        imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
-
-
-    }
-
-    private void loadCounties() {
-        List<String> countyList = sqLiteHandler.getCounties();
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
-
-        countySpinner.setAdapter(countyAdapter);
-
-    }
-
-    private void loadWards(String constituency) {
-        List<String> countyList = sqLiteHandler.getWards(constituency);
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
-
-        wardSpinner.setAdapter(countyAdapter);
-    }
-
-    private void loadPollStations(String ward) {
-        List<String> countyList = sqLiteHandler.getPollStations(ward);
-        Log.d(LOG_TAG, "Size sssssssss" + countyList.size());
-        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
-                countyList);
-
-        pollSpinner.setAdapter(countyAdapter);
-    }
-
-    private void parseLocationData(String list, String variant) {
-        try {
-            JSONObject dataObject = new JSONObject(list);
-            JSONArray locationsArray = dataObject.getJSONArray("data");
-            for (int i = 0; i < locationsArray.length(); i++) {
-                JSONObject locationObject = locationsArray.getJSONObject(i);
-                LocationModel lm = new LocationModel();
-                if (variant.equals("county")) {
-                    lm.setCounty_id(locationObject.getString("county_id"));
-                    lm.setCounty_label(locationObject.getString("county_label"));
-                } else {
-                    lm.setLocation_id(locationObject.getString("location_id"));
-                    lm.setLocation_label(locationObject.getString("location_label"));
                 }
-                countyModelList.add(lm);
-                Log.d("location-listedssssss", locationObject.getString("county_label"));
-            }
+                if (pollStationId.size() > 0) {
+                    pollStationId.clear();
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    JSONArray jsonArray = jsonObject.getJSONArray("location");
+                    if (jsonArray.length() > 0) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            String ward = obj.getString("ward");
+                            String stream = obj.getString("stream");
+                            String id = obj.getString("id");
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.d("location-list", e.toString());
-        }
+                            if (ward.equals(wardName)) {
+                                pollStationStreamList.add(stream);
 
-        CountyAutoCompleteAdapter regionAutoCompleteAdapter = new CountyAutoCompleteAdapter(parentActivity,
-                R.layout.autocomplete_row_item, countyModelList, variant);
-        edCounty.setAdapter(regionAutoCompleteAdapter);
-    }
-
-
-    private void sampleQuery() {
-        pDialog.setMessage("Fetching places data...");
-        pDialog.show();
-        Log.d(LOG_TAG, "Exceddd");
-        StringRequest request = new StringRequest(Request.Method.GET, "http://inovatec.co.ke/redwood/table10.php",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        pDialog.dismiss();
-                        Log.d(LOG_TAG, response);
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            JSONArray jsonArray = jsonObject.getJSONArray("location");
-                            Log.d(LOG_TAG, "" + jsonArray.length());
-                            if (jsonArray.length() > 0) {
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject obj = jsonArray.getJSONObject(i);
-                                    String id = obj.getString("id");
-                                    String county = obj.getString("county");
-                                    String constituency = obj.getString("constituency");
-                                    String ward = obj.getString("ward");
-                                    String pollStation = obj.getString("poll_st");
-
-                                    if (sqLiteHandler.getRowCount() < jsonArray.length()) {
-                                        sqLiteHandler.addToLoc(county, id, constituency, ward, pollStation);
-                                    }
-                                }
+                                pollStationId.add(id);
+                                Log.d(LOG_TAG, "Id added");
                             }
-                            loadCounties();
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
                         }
 
+                        Log.d(LOG_TAG, "" + pollStationId.size());
+                        pollStreamAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, pollStationStreamList);
+                        streamSpinner.setAdapter(pollStreamAdapter);
+                        streamSpinner.setVisibility(View.VISIBLE);
                     }
-                }, new Response.ErrorListener() {
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 pDialog.dismiss();
@@ -583,71 +554,118 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    public void locationsRequestVolley(final String url, final String variant) {
-        pDialog.setMessage("Loading places");
-        pDialog.show();
-        StringRequest request = new StringRequest(Request.Method.GET, getResources().getString(R.string.base_url) + url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        pDialog.dismiss();
-                        Log.d(LOG_TAG, s);
-                        Log.d("Bladdy", " hell");
-                        requestedStarted = false;
-                        if (variant.equals("places")) {
-                            if (locationsPreference.getConstituencyList().isEmpty()) {
-                                locationsPreference.setConstituencyList(s);
-                            }
 
-                            try {
-                                JSONObject dataObject = new JSONObject(s);
-                                JSONArray locationsArray = dataObject.getJSONArray("data");
-                                for (int i = 0; i < locationsArray.length(); i++) {
-                                    JSONObject locationObject = locationsArray.getJSONObject(i);
-                                    LocationModel lm = new LocationModel();
-
-                                    lm.setLocation_id(locationObject.getString("estate_id"));
-                                    lm.setLocation_label(locationObject.getString("estate_label"));
-                                    locationModelList.add(lm);
+    @OnClick(R.id.submit_button)
+    void submitButton() {
+        railaStr = railaTotal.getText().toString();
+        uhuruStr = uhuruTotal.getText().toString();
+        spoiltVotesStr = spoiltVotes.getText().toString();
+        total = totalVotes.getText().toString();
+        registerdVoters = spoiltVotesStr;
+        rejectedBallotPapersStr = rejectedBallot.getText().toString();
+        rejectedObjectedStr = objectedRejected.getText().toString();
+        disputedVotes = disputed.getText().toString();
+        validVotesStr = total;
+        int rejecBal, objRej, dispuV = 0;
+        rejecBal = Integer.parseInt(rejectedBallotPapersStr);
+        objRej = Integer.parseInt(rejectedObjectedStr);
+        dispuV = Integer.parseInt(disputedVotes);
+        int spoiltTotal = rejecBal + objRej + dispuV;
+        final String spoiltKura = String.valueOf(spoiltTotal);
 
 
-                                }
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Log.d("locatiion_req", e.toString());
-                            }
-                            ConstituencyAutoCompleteAdapter regionAutoCompleteAdapter = new ConstituencyAutoCompleteAdapter(parentActivity,
-                                    android.R.layout.simple_dropdown_item_1line, locationModelList, "location");
-//                            edConstituency.setAdapter(regionAutoCompleteAdapter);
-                            constituencySpinner.setAdapter(regionAutoCompleteAdapter);
-                            constituencySpinner.setVisibility(View.VISIBLE);
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !spoiltVotesStr.isEmpty() && !total.isEmpty()) {
+            buttonSubmit.setEnabled(false);
+
+            countyStr = countyStr.replace("'", "\\'");
+            wardName = wardName.replace("'", "\\'");
+            constName = constName.replace("'", "\\'");
+            pollStStr = pollStStr.replace("'", "\\'");
+
+            Log.d(LOG_TAG, countyStr + "||" + constName + "||" + wardName + "||" + pollStStr + "||" + railaStr + "||" + uhuruStr + "||" + spoiltVotesStr);
+            final String iD = pollStationId.get(pollStationStreamList.indexOf(streamSpinner.getSelectedItem().toString()));
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            View view = inflater.inflate(R.layout.checkboxes, null);
+            builder.setView(view);
+            final EditText raila, uhuru, registered, rejectedBallotInDialog, rejectedObjected, disputedInDialog, validCast;
+
+            raila = (EditText) view.findViewById(R.id.raila_total);
+            uhuru = (EditText) view.findViewById(R.id.uhuru_total);
+            registered = (EditText) view.findViewById(R.id.spoilt_votes);
+            rejectedBallotInDialog = (EditText) view.findViewById(R.id.rejected_ballot);
+            rejectedObjected = (EditText) view.findViewById(R.id.objected_rejected);
+            disputedInDialog = (EditText) view.findViewById(R.id.disputed_votes);
+            validCast = (EditText) view.findViewById(R.id.total_votes);
+
+            raila.setText(railaStr);
+            uhuru.setText(uhuruStr);
+            registered.setText(registerdVoters);
+            rejectedBallotInDialog.setText(rejectedBallotPapersStr);
+            rejectedObjected.setText(rejectedObjectedStr);
+            disputedInDialog.setText(disputedVotes);
+            validCast.setText(validVotesStr);
+
+            raila.setEnabled(false);
+            uhuru.setEnabled(false);
+            registered.setEnabled(false);
+            rejectedBallotInDialog.setEnabled(false);
+            rejectedObjected.setEnabled(false);
+            disputedInDialog.setEnabled(false);
+            validCast.setEnabled(false);
+
+            builder.setTitle("Post data");
+            builder.setMessage("Confirm posting of the data as it is");
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
 
-//                            edConstituency.setVisibility(View.VISIBLE);
-//                            tvTitle.setVisibility(View.VISIBLE);
+                    pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
 
-                        } else {
-                            locationsPreference.setCountyList(s);
-                            parseLocationData(s, "county");
-                        }
+                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, getDateTime());
 
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.d("locatiion_req-e", volleyError.getMessage());
-                pDialog.dismiss();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                return super.getParams();
-            }
-        };
+                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+                            rejectedObjectedStr, disputedVotes, validVotesStr, getDateTime());
 
-        AppController.getInstance().addToRequestQueue(request);
+                    uploadImageClient(iD);
+                    candidatesView.setVisibility(View.GONE);
+                    railaTotal.setText("");
+                    uhuruTotal.setText("");
+                    spoiltVotes.setText("");
+                    rejectedBallot.setText("");
+                    objectedRejected.setText("");
+                    disputed.setText("");
+                    totalVotes.setText("");
+
+
+                    imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    buttonSubmit.setEnabled(true);
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+
+        } else {
+            railaTotal.setError("Please fill in this field");
+            uhuruTotal.setError("Please fill in this field");
+            spoiltVotes.setError("Please fill in this field");
+        }
+
     }
+
+
 
     @OnClick(R.id.imageview_container)
     void imageViewContainer() {
@@ -655,7 +673,8 @@ public class MainFragment extends Fragment {
         if (pollStStr.isEmpty()) {
             Toast.makeText(getContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
         } else {
-            startChooser();
+//            startChooser();
+            PickImageDialog.build(new PickSetup()).show(getFragmentManager());
         }
 
     }
@@ -675,7 +694,7 @@ public class MainFragment extends Fragment {
     }
 
     private void startChooser() {
-        imagePicker.startCamera(this, new ImagePicker.Callback() {
+        imagePicker.startChooser(this, new ImagePicker.Callback() {
             @Override
             public void onPickImage(Uri imageUri) {
 
@@ -685,11 +704,17 @@ public class MainFragment extends Fragment {
             public void onCropImage(Uri imageUri) {
                 super.onCropImage(imageUri);
                 if (position == 1) {
-//                    imageViewContainer.setImageURI(imageUri);
                     try {
                         Log.d(LOG_TAG, imageUri.getPath());
                         bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                         imageViewContainer.setImageBitmap(bitmap);
+                        if (bitmap != null) {
+                            if (candidatesView.getVisibility() == View.GONE) {
+                                candidatesView.setVisibility(View.VISIBLE);
+                            }
+                            buttonSubmit.setEnabled(true);
+
+                        }
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -743,10 +768,16 @@ public class MainFragment extends Fragment {
         return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
+    private String getDateTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
     private void uploadImageClient(final String pollStId) {
         final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
                 Locale.getDefault()).format(new Date());
-//        progressBar.setVisibility(View.VISIBLE);
         pDialog.setMessage("Uploading...");
         showDialog();
         Log.d("Image upload", "started");
@@ -755,14 +786,33 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onResponse(String s) {
                         pDialog.dismiss();
+                        buttonSubmit.setEnabled(false);
                         Log.d("Upload image", s);
-                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
-                        candidatesView.setVisibility(View.GONE);
+//                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
+
+                        // Show dialogbox
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Success!");
+                        builder.setMessage("Data saved successfully");
+                        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+
+                        // Clear the spinner
+                        streamSpinner.setAdapter(null);
+
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 hideDialog();
+                buttonSubmit.setEnabled(false);
             }
         }) {
             @Override
@@ -781,7 +831,8 @@ public class MainFragment extends Fragment {
 
     }
 
-    private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr) {
+    private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
+                                 final String streamStr) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABELE_ONE, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -802,6 +853,7 @@ public class MainFragment extends Fragment {
                 params.put("constituency", constStr);
                 params.put("ward", wardStr);
                 params.put("poll_station", pollStStr);
+                params.put("stream", streamStr);
 
                 return params;
             }
@@ -810,8 +862,8 @@ public class MainFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String didaStr,
-                                final String nyagahStr, final String jirongoStr, final String aukotStr, final String mwauraStr, final String kaluyuStr) {
+    private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total,
+                                final String timeOnDevice) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -831,19 +883,49 @@ public class MainFragment extends Fragment {
                 params.put("poll_station_id", pollStId);
                 params.put("raila", railaStr);
                 params.put("uhuru", uhuruStr);
-                params.put("dida", didaStr);
-                params.put("nyagah", nyagahStr);
-                params.put("jirongo", jirongoStr);
-                params.put("aukot", aukotStr);
-                params.put("mwaura", mwauraStr);
-                params.put("kaluyu", kaluyuStr);
-
+                params.put("spoilt_votes", spoiltVotesStr);
+                params.put("total", total);
+                params.put("time_on_device", timeOnDevice);
                 return params;
             }
         };
 
         AppController.getInstance().addToRequestQueue(request);
 
+    }
+
+    private void pushToTableTwoDev(final String pollStId, final String railaStr, final String uhuruStr, final String registeredVoters,
+                                   final String rejectedBallotPapersStr, final String rejectedObjectedStr, final String disputedVotes,
+                                   final String validVotesStr, final String timeOnDevice) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO_DEV, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("poll_station_id", pollStId);
+                params.put("raila", railaStr);
+                params.put("uhuru", uhuruStr);
+                params.put("registered_voters", registeredVoters);
+                params.put("rejected_ballot", rejectedBallotPapersStr);
+                params.put("rejected_objected", rejectedObjectedStr);
+                params.put("disputed_votes", disputedVotes);
+                params.put("valid_votes", validVotesStr);
+                params.put("time_on_device", timeOnDevice);
+
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
     }
 
     private File saveImageToExternal(Uri imageUri, String pollStId) {
@@ -953,4 +1035,14 @@ public class MainFragment extends Fragment {
     }
 
 
+    @Override
+    public void onPickResult(PickResult pickResult) {
+        if (pickResult.getError() == null) {
+            imageViewContainer.setImageBitmap(pickResult.getBitmap());
+
+            bitmap = pickResult.getBitmap();
+
+            buttonSubmit.setEnabled(true);
+        }
+    }
 }
