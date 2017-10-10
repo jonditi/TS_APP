@@ -22,20 +22,28 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 
+import com.pathways_international.ts.BuildConfig;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.activity.CropImageActivity;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Helper to simplify crop image work like starting pick-image acitvity and handling camera/gallery intents.<br>
@@ -54,6 +62,9 @@ public final class CropImage {
      * The key used to pass crop image source URI to {@link CropImageActivity}.
      */
     public static final String CROP_IMAGE_EXTRA_SOURCE = "CROP_IMAGE_EXTRA_SOURCE";
+
+    // Directory name to store captured images and videos
+    public static final String IMAGE_DIRECTORY_NAME = "Android File Upload";
 
     /**
      * The key used to pass crop image options to {@link CropImageActivity}.
@@ -209,6 +220,7 @@ public final class CropImage {
             outputFileUri = getCaptureImageOutputUri(context);
         }
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+//        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         return intent;
     }
 
@@ -268,7 +280,7 @@ public final class CropImage {
     }
 
     /**
-     * Check if explicetly requesting camera permission is required.<br>
+     * Check if explicitly requesting camera permission is required.<br>
      * It is required in Android Marshmellow and above if "CAMERA" permission is requested in the manifest.<br>
      * See <a href="http://stackoverflow.com/questions/32789027/android-m-camera-intent-permission-bug">StackOverflow
      * question</a>.
@@ -314,10 +326,65 @@ public final class CropImage {
     public static Uri getCaptureImageOutputUri(@NonNull Context context) {
         Uri outputFileUri = null;
         File getImage = context.getExternalCacheDir();
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault()).format(new Date());
         if (getImage != null) {
             outputFileUri = Uri.fromFile(new File(getImage.getPath(), "pickImageResult.jpeg"));
+
+            // Uncomment below if you wish to use {@link ImagePicker.startCamera() method}
+            // Since Android N requires the path to be of content:// schema instead of file://
+//            outputFileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", getOutputMediaFile());
         }
+
         return outputFileUri;
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "Camera");
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        String mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+    /**
+     * returning image / video
+     */
+    private static File getOutputMediaFile() {
+
+
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                IMAGE_DIRECTORY_NAME);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("LOOOOOD", "Oops! Failed create "
+                        + IMAGE_DIRECTORY_NAME + " directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + ".jpg");
+
+
+        return mediaFile;
     }
 
     /**

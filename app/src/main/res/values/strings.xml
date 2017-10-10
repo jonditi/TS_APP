@@ -6,11 +6,62 @@
     <!-- Elective seats array -->
     <string-array name="seat">
         <item>President</item>
-        <item>Governor</item>
-        <item>Senator</item>
-        <item>MP</item>
-        <item>Women Rep</item>
-        <item>MCA</item>
+        <!--<item>Governor</item>-->
+        <!--<item>Senator</item>-->
+        <!--<item>MP</item>-->
+        <!--<item>Women Rep</item>-->
+        <!--<item>MCA</item>-->
+    </string-array>
+
+    <!-- Counties array -->
+    <string-array name="counties">
+        <item>Baringo</item>
+        <item>Bomet</item>
+        <item>Bungoma</item>
+        <item>Busia</item>
+        <item>Elgeyo/Marakwet</item>
+        <item>Embu</item>
+        <item>Garissa</item>
+        <item>Isiolo</item>
+        <item>Kajiado</item>
+        <item>Kericho</item>
+        <item>Kakamega</item>
+        <item>Kiambu</item>
+        <item>Kilifi</item>
+        <item>Kirinyiga</item>
+        <item>Kisii</item>
+        <item>Kisumu</item>
+        <item>Kitui</item>
+        <item>Kwale</item>
+        <item>Laikipia</item>
+        <item>Lamu</item>
+        <item>Machakos</item>
+        <item>Makueni</item>
+        <item>Mandera</item>
+        <item>Mandera</item>
+        <item>Marsabit</item>
+        <item>Meru</item>
+        <item>Migori</item>
+        <item>Mombasa</item>
+        <item>Murang\'a</item>
+        <item>Nairobi City</item>
+        <item>Nakuru</item>
+        <item>Nandi</item>
+        <item>Narok</item>
+        <item>Nyamira</item>
+        <item>Nyandarua</item>
+        <item>Nyeri</item>
+        <item>Samburu</item>
+        <item>Siaya</item>
+        <item>Taita Taveta</item>
+        <item>Tana River</item>
+        <item>Tharaka Nithi</item>
+        <item>Trans Nzoia</item>
+        <item>Turkana</item>
+        <item>Uasin Gishu</item>
+        <item>Vihiga</item>
+        <item>Wajir</item>
+        <item>West Pokot</item>
     </string-array>
 
     <string name="crop_image_activity_title"> </string>
@@ -19,4 +70,113 @@
     <string name="crop_image_menu_crop">Done</string>
     <string name="pick_image_intent_chooser_title">Pick Image</string>
     <string name="base_url">https://fundilistapp.com/api/public/v1/</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="success_sub_title">Data saved successfully</string>
+    <string name="ok">Done</string>
+    <string name="success_title">Success!</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_name">User Name</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="hint_phone">Phone</string>
+    <string name="hint_id_number">Id Number</string>
+    <string name="hint_verification_key">Verification key</string>
+    <string name="hint_verification">Verification</string>
+    <string name="hint_verification_message">Waiting to automatically detect code sent to </string>
+    <string name="raila_total">Raila</string>
+    <string name="hint_uhuru_total">Uhuru</string>
+    <string name="hint_spoilt">Spoilt Votes</string>
+    <string name="hint_registered_voters">Registered Voters</string>
+    <string name="hint_rejected_ballot">Rejected ballot papers</string>
+    <string name="hint_objected_ballot">Rejected objected ballot papers</string>
+    <string name="hint_disputed">Disputed votes</string>
+    <string name="hint_valid_votes">Valid votes cast</string>
+    <string name="hint_total">Total</string>
+    <string name="btn_login">LOGIN</string>
+    <string name="btn_register">REGISTER</string>
+    <string name="btn_link_to_register">Not a member? Sign up now.</string>
+    <string name="btn_link_to_login">Already registered! Login.</string>
+    <string name="welcome">Welcome</string>
+    <string name="btn_logout">LOGOUT</string>
+    <string name="name">Full Name</string>
+    <string name="voter_turn_out">Voter Turn Out</string>
+    <string name="polling_center">Polling Center</string>
+    <string name="polling_station">Polling Station</string>
+    <string name="polling_stream">Stream</string>
+    <string name="county">County</string>
+    <string name="constituency">Constituency</string>
+    <string name="ward">Ward</string>
 </resources>
