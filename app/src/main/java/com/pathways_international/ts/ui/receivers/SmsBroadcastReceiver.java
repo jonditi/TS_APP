@@ -97,10 +97,9 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 sender = messages[0].getOriginatingAddress();
                 Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
                 Log.d(SmsBroadcastReceiver.class.getSimpleName(), smsBody);
-                sessionManager.setMessage(smsBody);
-                Intent smsBodyIntent = new Intent("verificationKey");
-                smsBodyIntent.putExtra("verification_key", smsBody);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(smsBodyIntent);
+//                Intent smsBodyIntent = new Intent("verificationKey");
+//                smsBodyIntent.putExtra("verification_key", smsBody);
+//                LocalBroadcastManager.getInstance(context).sendBroadcast(smsBodyIntent);
                 if (sender.contains(phone.substring(1))) {
                     Log.d(SmsBroadcastReceiver.class.getSimpleName(), sender);
                     Log.d(SmsBroadcastReceiver.class.getSimpleName(), phone);

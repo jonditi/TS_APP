@@ -61,9 +61,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.fotoapparat.Fotoapparat;
-import io.fotoapparat.parameter.ScaleType;
-import io.fotoapparat.view.CameraView;
+
 
 public class VoterTurnout extends AppCompatActivity implements IPickResult {
 

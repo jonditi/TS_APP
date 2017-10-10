@@ -80,10 +80,18 @@ public class Login extends AppCompatActivity {
 
         // Check if user is already logged in or not
         if (session.isLoggedIn()) {
-            // User is already logged in. Take him to main activity
-            Intent intent = new Intent(Login.this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            if (!session.getAgentType().isEmpty() && session.getAgentType().equals("constituency agent")) {
+                // User is already logged in. Take him to main activity
+                Intent intent = new Intent(Login.this, CTC.class);
+                startActivity(intent);
+                finish();
+            } else if (!session.getAgentType().isEmpty() && session.getAgentType().equals("polling station agent")) {
+                // User is already logged in. Take him to main activity
+                Intent intent = new Intent(Login.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
         }
 
 
@@ -170,7 +178,14 @@ public class Login extends AppCompatActivity {
                         String idNumber = user.getString("id_number");
                         String phone = user.getString("phone");
                         String constName = user.getJSONObject("constituency_code").getString("CONSTITUENCY_NAME");
-                        String wardName = user.getJSONObject("ward").getString("CAW_NAME");
+                        String countyName = user.getJSONObject("constituency_code").getString("COUNTY_NAME");
+                        String wardName;
+                        try {
+                            wardName = user.getJSONObject("ward").getString("CAW_NAME");
+                        } catch (JSONException e) {
+                            wardName = "null";
+                        }
+
                         String verificationKey = user.getJSONObject("verification_key").getString("verification_key");
                         String constCode = user.getString("const_code");
                         String wardCode = user.getString("ward_code");
@@ -178,7 +193,13 @@ public class Login extends AppCompatActivity {
                                 .getString("created_at");
 
                         // Inserting row in users table
-                        db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, wardName, wardCode, created_at);
+                        if (db.getRowCount() > 0) {
+                            db.deleteUsers();
+                            db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, countyName, wardName, wardCode, created_at);
+                        } else {
+                            db.addUser(name, lastName, idNumber, phone, uid, constCode, constName, countyName, wardName, wardCode, created_at);
+                        }
+
 
                         sendVerificationKeyInSms(phone, verificationKey);
 

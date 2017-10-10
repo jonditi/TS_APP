@@ -83,8 +83,7 @@
             android:indeterminate="false"
             android:max="100"
             android:progress="40"
-            android:progressBackgroundTint="#ea4c88"
-            android:visibility="gone" />
+            android:progressBackgroundTint="#ea4c88" />
     </LinearLayout>
 
 </LinearLayout>

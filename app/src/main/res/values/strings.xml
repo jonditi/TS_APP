@@ -144,6 +144,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="success_sub_title">Data saved successfully</string>
+    <string name="agent_sub_title">What type of agent are you?</string>
     <string name="ok">Done</string>
     <string name="success_title">Success!</string>
     <string name="hint_email">Email</string>
@@ -164,6 +165,7 @@
     <string name="hint_objected_ballot">Rejected objected ballot papers</string>
     <string name="hint_disputed">Disputed votes</string>
     <string name="hint_valid_votes">Valid votes cast</string>
+    <string name="hint_tallying_center">Constituency Tallying Center</string>
     <string name="hint_total">Total</string>
     <string name="btn_login">LOGIN</string>
     <string name="btn_register">REGISTER</string>
@@ -179,4 +181,9 @@
     <string name="county">County</string>
     <string name="constituency">Constituency</string>
     <string name="ward">Ward</string>
+    <string name="polling_station_code">Polling Station Code</string>
+    <string name="polling_station_name">Polling Station Name</string>
+    <string name="constituency_agent">Constituency Agent</string>
+    <string name="agent_type">Agent Type</string>
+    <string name="poll_station_agent">Poll Station Agent</string>
 </resources>

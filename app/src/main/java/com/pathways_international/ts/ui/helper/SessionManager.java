@@ -59,4 +59,15 @@ public class SessionManager {
 
         Log.d(TAG, "message set");
     }
+
+    public void setAgentType(String agentType) {
+        editor.putString("agent", agentType);
+        editor.apply();
+
+        Log.d(TAG, "Agent type set");
+    }
+
+    public String getAgentType() {
+        return pref.getString("agent", "");
+    }
 }

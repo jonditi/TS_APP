@@ -79,6 +79,7 @@ public class VerifyKey extends AppCompatActivity {
             public void onSmsReceived(String textMessage) {
                 Log.d(VerifyKey.class.getSimpleName(), textMessage);
                 verificationEdit.setText(textMessage);
+                progressBar.setVisibility(View.GONE);
             }
         });
 
@@ -87,17 +88,18 @@ public class VerifyKey extends AppCompatActivity {
             public void messageReceived(String messageText) {
                 Log.d("SmsBroacastReceiver", messageText);
                 verificationEdit.setText(messageText);
+                progressBar.setVisibility(View.GONE);
 
             }
         });
 
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String key = intent.getStringExtra("verification_key");
-                verificationEdit.setText(key);
-            }
-        };
+//        broadcastReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                final String key = intent.getStringExtra("verification_key");
+//                verificationEdit.setText(key);
+//            }
+//        };
 
         if (ActivityCompat.checkSelfPermission(VerifyKey.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             askForPermission(Manifest.permission.READ_SMS, 0);
@@ -194,9 +196,22 @@ public class VerifyKey extends AppCompatActivity {
                         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                                sessionManager.setLogin(true);
-                                finish();
+                                if (!sessionManager.getAgentType().isEmpty() && sessionManager.getAgentType().equals("constituency agent")) {
+                                    // User is already logged in. Take him to main activity
+                                    Intent intent = new Intent(VerifyKey.this, CTC.class);
+                                    startActivity(intent);
+                                    sessionManager.setLogin(true);
+                                    finish();
+                                } else if (!sessionManager.getAgentType().isEmpty() && sessionManager.getAgentType().equals("polling station agent")) {
+                                    // User is already logged in. Take him to main activity
+                                    Intent intent = new Intent(VerifyKey.this, MainActivity.class);
+                                    startActivity(intent);
+                                    sessionManager.setLogin(true);
+                                    finish();
+                                }
+//                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+//                                sessionManager.setLogin(true);
+//                                finish();
                             }
                         });
 
@@ -205,7 +220,7 @@ public class VerifyKey extends AppCompatActivity {
 
                     } else {
                         // Error in login. Get the error message
-                        String errorMsg = jObj.getString("error_msg");
+                        String errorMsg = jObj.getString("message");
                         Toast.makeText(getApplicationContext(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
