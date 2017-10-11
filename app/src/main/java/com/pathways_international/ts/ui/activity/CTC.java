@@ -3,11 +3,14 @@ package com.pathways_international.ts.ui.activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,7 +26,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
-import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.utils.Urls;
@@ -58,21 +60,21 @@ public class CTC extends AppCompatActivity implements IPickResult {
     TextView countyName;
 
     @BindView(R.id.raila_total)
-    EditText railaTotal;
+    TextInputEditText railaTotal;
     @BindView(R.id.uhuru_total)
-    EditText uhuruTotal;
+    TextInputEditText uhuruTotal;
 
     @BindView(R.id.poll_station_code)
-    EditText pollStationCode;
+    TextInputEditText pollStationCode;
     @BindView(R.id.registered_voters)
-    EditText registeredVoters;
+    TextInputEditText registeredVoters;
 
     @BindView(R.id.rejected_ballot)
-    EditText rejectedBallot;
+    TextInputEditText rejectedBallot;
     @BindView(R.id.poll_station_name)
-    EditText pollStationName;
+    TextInputEditText pollStationName;
     @BindView(R.id.total_votes)
-    EditText totalVotes;
+    TextInputEditText totalVotes;
 
     @BindView(R.id.candidates_view)
     LinearLayout candidatesView;
@@ -80,7 +82,7 @@ public class CTC extends AppCompatActivity implements IPickResult {
     private ProgressDialog pDialog;
 
     String railaStr, uhuruStr, pollStationNameStr, pollStationCodeStr;
-    String registerdVoters;
+    String registeredVotersStr;
     String rejectedBallotStr;
     String rejectedObjectedStr;
     String validVotesStr;
@@ -130,7 +132,107 @@ public class CTC extends AppCompatActivity implements IPickResult {
         PickImageDialog.build(new PickSetup()).show(this);
     }
 
-    // TODO: Handle submit button click.
+    @OnClick(R.id.submit_button)
+    void submitButton() {
+        railaStr = railaTotal.getText().toString();
+        uhuruStr = uhuruTotal.getText().toString();
+        pollStationNameStr = pollStationName.getText().toString();
+        pollStationCodeStr = pollStationCode.getText().toString();
+        registeredVotersStr = registeredVoters.getText().toString();
+        rejectedBallotStr = rejectedBallot.getText().toString();
+        validVotesStr = totalVotes.getText().toString();
+
+
+        if (!railaStr.isEmpty() && !uhuruStr.isEmpty() && !pollStationNameStr.isEmpty() && !pollStationCodeStr.isEmpty() && !rejectedBallotStr.isEmpty()
+                && !registeredVotersStr.isEmpty() && !validVotesStr.isEmpty()) {
+            buttonSubmit.setEnabled(false);
+
+
+            county = county.replace("'", "\\'");
+            wardName = wardName.replace("'", "\\'");
+            constName = constName.replace("'", "\\'");
+            pollStationNameStr = pollStationNameStr.replace("'", "\\'");
+
+            Log.d(LOG_TAG, county + "||" + constName + "||" + wardName + "||" + pollStationNameStr + "||" + railaStr + "||" + uhuruStr + "||" + pollStationCodeStr);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(CTC.this);
+
+            LayoutInflater inflater = LayoutInflater.from(CTC.this);
+            View view = inflater.inflate(R.layout.result_fields, null);
+            builder.setView(view);
+            final EditText raila, uhuru, registered, rejectedBallotInDialog, pollStationNameInDialog, pollStationCodeInDialog, validCast;
+
+            raila = (EditText) view.findViewById(R.id.raila_total);
+            uhuru = (EditText) view.findViewById(R.id.uhuru_total);
+            registered = (EditText) view.findViewById(R.id.registered_voters);
+            rejectedBallotInDialog = (EditText) view.findViewById(R.id.rejected_ballot);
+            pollStationNameInDialog = (EditText) view.findViewById(R.id.poll_station_name);
+            pollStationCodeInDialog = (EditText) view.findViewById(R.id.poll_station_code);
+            validCast = (EditText) view.findViewById(R.id.total_votes);
+
+            raila.setText(railaStr);
+            uhuru.setText(uhuruStr);
+            registered.setText(registeredVotersStr);
+            rejectedBallotInDialog.setText(rejectedBallotStr);
+            pollStationNameInDialog.setText(pollStationNameStr);
+            pollStationCodeInDialog.setText(pollStationCodeStr);
+            validCast.setText(validVotesStr);
+
+            raila.setEnabled(false);
+            uhuru.setEnabled(false);
+            registered.setEnabled(false);
+            rejectedBallotInDialog.setEnabled(false);
+            pollStationNameInDialog.setEnabled(false);
+            pollStationCodeInDialog.setEnabled(false);
+            validCast.setEnabled(false);
+
+            builder.setTitle("Post data");
+            builder.setMessage("Confirm posting of the data as it is");
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+
+                    pushToConstituencyTallying(pollStationCodeStr, pollStationNameStr, railaStr, uhuruStr, registeredVotersStr, rejectedBallotStr,
+                            validVotesStr, county, constName);
+
+                    uploadImageClient(constCode);
+                    candidatesView.setVisibility(View.GONE);
+                    railaTotal.setText("");
+                    uhuruTotal.setText("");
+                    pollStationCode.setText("");
+                    rejectedBallot.setText("");
+                    pollStationName.setText("");
+                    registeredVoters.setText("");
+                    totalVotes.setText("");
+
+
+                    imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    buttonSubmit.setEnabled(true);
+                    dialog.dismiss();
+                }
+            });
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+
+        } else {
+            railaTotal.setError("Please fill in this field");
+            uhuruTotal.setError("Please fill in this field");
+            registeredVoters.setError("Please fill in this field");
+            rejectedBallot.setError("Please fill in this field");
+            pollStationName.setError("Please fill in this field");
+            pollStationCode.setError("Please fill in this field");
+            totalVotes.setError("Please fill in this field");
+        }
+
+    }
 
     @Override
     public void onPickResult(PickResult pickResult) {
@@ -154,13 +256,13 @@ public class CTC extends AppCompatActivity implements IPickResult {
         return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
-    private void uploadImageClient(final String pollStId) {
+    private void uploadImageClient(final String constCode) {
         final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
                 Locale.getDefault()).format(new Date());
         pDialog.setMessage("Uploading...");
         pDialog.show();
         Log.d("Image upload", "started");
-        StringRequest request = new StringRequest(Request.Method.POST, Urls.UPLOAD_IMAGE,
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.UPLOAD_CONSTITUENCY_IMAGE,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -169,19 +271,24 @@ public class CTC extends AppCompatActivity implements IPickResult {
                         Log.d("Upload image", s);
 //                        Toast.makeText(getContext(), "Data saved", Toast.LENGTH_SHORT).show();
 
-                        // Show dialogbox
-                        AlertDialog.Builder builder = new AlertDialog.Builder(CTC.this);
-                        builder.setTitle("Success!");
-                        builder.setMessage("Data saved successfully");
-                        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
+                        if (!s.contains("error")) {
+                            // Show dialogbox
+                            AlertDialog.Builder builder = new AlertDialog.Builder(CTC.this);
+                            builder.setTitle("Success!");
+                            builder.setMessage("Data saved successfully");
+                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
 
-                        AlertDialog alertDialog = builder.create();
-                        alertDialog.show();
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "An error occured while uploading the image", Toast.LENGTH_LONG).show();
+                        }
+
 
 
                     }
@@ -198,8 +305,8 @@ public class CTC extends AppCompatActivity implements IPickResult {
 
                 Map<String, String> params = new HashMap<>();
                 params.put("image", image);
-                params.put("name", pollStId + "_" + timeStamp);
-                params.put("poll_station_id", pollStId);
+                params.put("name", constCode + "_" + timeStamp);
+                params.put("constituency_code", constCode);
                 return params;
             }
         };
@@ -208,13 +315,13 @@ public class CTC extends AppCompatActivity implements IPickResult {
 
     }
 
-    private void pushToTableTwoDev(final String pollStId, final String railaStr, final String uhuruStr, final String registeredVoters,
-                                   final String rejectedBallotPapersStr, final String rejectedObjectedStr, final String disputedVotes,
-                                   final String validVotesStr, final String timeOnDevice) {
-        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO_DEV, new Response.Listener<String>() {
+    private void pushToConstituencyTallying(final String pollStationCode, final String pollStationNameStr, final String railaStr, final String uhuruStr, final String registeredVoters,
+                                            final String rejectedBallotPapersStr, final String validVotesStr, final String county,
+                                            final String constituency) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_CONSTITUENCY_TALLY, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-
+                Log.d("Server Response", response);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -225,15 +332,16 @@ public class CTC extends AppCompatActivity implements IPickResult {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("poll_station_id", pollStId);
+                params.put("polling_station_code", pollStationCode);
+                params.put("polling_station_name", pollStationNameStr);
                 params.put("raila", railaStr);
                 params.put("uhuru", uhuruStr);
                 params.put("registered_voters", registeredVoters);
                 params.put("rejected_ballot", rejectedBallotPapersStr);
-                params.put("rejected_objected", rejectedObjectedStr);
-                params.put("disputed_votes", disputedVotes);
                 params.put("valid_votes", validVotesStr);
-                params.put("time_on_device", timeOnDevice);
+                params.put("county", county);
+                params.put("constituency", constituency);
+
 
                 return params;
             }
