@@ -112,7 +112,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp">
 
-                <android.support.v7.widget.AppCompatEditText
+                <android.support.design.widget.TextInputEditText
                     android:id="@+id/voter_turnout_total"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"

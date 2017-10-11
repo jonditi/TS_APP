@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -88,7 +89,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
     TextView pageTitle;
 
     @BindView(R.id.voter_turnout_total)
-    EditText voterTurnoutTotalEditText;
+    TextInputEditText voterTurnoutTotalEditText;
 
     String totalString;
 

@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
@@ -85,21 +86,21 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     ImageView imageViewContainer;
 
     @BindView(R.id.raila_total)
-    EditText railaTotal;
+    TextInputEditText railaTotal;
 
 
     @BindView(R.id.uhuru_total)
-    EditText uhuruTotal;
+    TextInputEditText uhuruTotal;
     @BindView(R.id.spoilt_votes)
-    EditText spoiltVotes;
+    TextInputEditText spoiltVotes;
     @BindView(R.id.total_votes)
-    EditText totalVotes;
+    TextInputEditText totalVotes;
     @BindView(R.id.rejected_ballot)
-    EditText rejectedBallot;
+    TextInputEditText rejectedBallot;
     @BindView(R.id.objected_rejected)
-    EditText objectedRejected;
+    TextInputEditText objectedRejected;
     @BindView(R.id.disputed_votes)
-    EditText disputed;
+    TextInputEditText disputed;
 
     @BindView(R.id.county_spinner)
     Spinner countySpinner;
