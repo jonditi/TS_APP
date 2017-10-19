@@ -186,4 +186,7 @@
     <string name="constituency_agent">Constituency Agent</string>
     <string name="agent_type">Agent Type</string>
     <string name="poll_station_agent">Poll Station Agent</string>
+    <string name="resend">RESEND</string>
+    <string name="done">DONE</string>
+    <string name="no_permission_granted">No permission granted.</string>
 </resources>

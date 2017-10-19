@@ -63,7 +63,7 @@ public class VerifyKey extends AppCompatActivity {
     SessionManager sessionManager;
     SQLiteHandler sqLiteHandler;
     SmsBroadcastReceiver smsBroadcastReceiver = new SmsBroadcastReceiver();
-    private BroadcastReceiver broadcastReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,14 +74,6 @@ public class VerifyKey extends AppCompatActivity {
         // User should not enter the key manually
         // if it failed the first time, then can login again.
         verificationEdit.setEnabled(false);
-        smsBroadcastReceiver.setListener(new SmsBroadcastReceiver.Listener() {
-            @Override
-            public void onSmsReceived(String textMessage) {
-                Log.d(VerifyKey.class.getSimpleName(), textMessage);
-                verificationEdit.setText(textMessage);
-                progressBar.setVisibility(View.GONE);
-            }
-        });
 
         SmsBroadcastReceiver.bindListener(new SmsListener() {
             @Override
@@ -93,13 +85,6 @@ public class VerifyKey extends AppCompatActivity {
             }
         });
 
-//        broadcastReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                final String key = intent.getStringExtra("verification_key");
-//                verificationEdit.setText(key);
-//            }
-//        };
 
         if (ActivityCompat.checkSelfPermission(VerifyKey.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             askForPermission(Manifest.permission.READ_SMS, 0);
@@ -171,7 +156,7 @@ public class VerifyKey extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        unregisterReceiver(smsBroadcastReceiver);
+
     }
 
     private void verifyKeyOnline(final String key) {
