@@ -9,7 +9,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.pathways_international.ts.ui.receivers.SmsBroadcastReceiver;
+
+import java.net.MalformedURLException;
 
 /*
 * 	We are creating a Application Singleton Object by extending Application, so it should be declared as a application in the "AndroidMainFests" file
@@ -20,6 +23,7 @@ public class AppController extends Application {
     private static AppController mInstance;
     private RequestQueue mRequestQueue;
     private SmsBroadcastReceiver smsBroadcastReceiver;
+    private MobileServiceClient mClient;
 
     public static synchronized AppController getInstance() {
         return mInstance;
@@ -62,5 +66,14 @@ public class AppController extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll(tag);
         }
+    }
+
+    public MobileServiceClient getmClient() throws MalformedURLException {
+        if (mClient == null) {
+            mClient = new MobileServiceClient("https://tsazure.azurewebsites.net",
+                    getApplicationContext());
+        }
+
+        return mClient;
     }
 }
