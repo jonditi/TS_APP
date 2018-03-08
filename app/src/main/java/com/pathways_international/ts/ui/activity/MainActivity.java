@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -44,6 +46,7 @@ import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
+import com.pathways_international.ts.ui.utils.ImageManager;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
 import com.vansuita.pickimage.bean.PickResult;
@@ -56,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -128,12 +132,14 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     String validVotesStr;
 
     Bitmap bitmap;
+    private Uri imageUri;
 
     private int position = 0;
     private ImagePicker imagePicker = new ImagePicker();
 
     private SQLiteHandler sqLiteHandler;
     private SessionManager sessionManager;
+
 
 
     String countyStr, streamStr = "";
@@ -553,6 +559,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                             rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
                     uploadImageClient(iD);
+                    uploadImageToAzure(iD);
                     candidatesView.setVisibility(View.GONE);
                     railaTotal.setText("");
                     uhuruTotal.setText("");
@@ -594,8 +601,10 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     public void onPickResult(PickResult pickResult) {
         if (pickResult.getError() == null) {
             imageViewContainer.setImageBitmap(pickResult.getBitmap());
+//            imageViewContainer.setImageURI(pickResult.getUri());
 
             bitmap = pickResult.getBitmap();
+            imageUri = pickResult.getUri();
             if (bitmap != null) {
                 if (candidatesView.getVisibility() == View.GONE) {
                     candidatesView.setVisibility(View.VISIBLE);
@@ -676,6 +685,48 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
         AppController.getInstance().addToRequestQueue(request);
 
+    }
+
+    private void uploadImageToAzure(final String pollStationId) {
+        final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+                Locale.getDefault()).format(new Date());
+//        pDialog.setMessage("Uploading...");
+//        pDialog.show();
+        final String idTimeSufix = pollStationId + "_" + timeStamp;
+        Log.d("Image upload to Azure", "started");
+
+        try {
+            final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+            final int imageLength = imageStream.available();
+
+            final Handler handler = new Handler();
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final String imageName = ImageManager.uploadImage(imageStream, imageLength, idTimeSufix);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+                    } catch (Exception e) {
+                        final String exceptionMessage = e.getMessage();
+                        handler.post(new Runnable() {
+                            public void run() {
+                                Toast.makeText(MainActivity.this, exceptionMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void pushToTabeleOne(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
