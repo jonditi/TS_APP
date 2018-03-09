@@ -38,6 +38,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.fragment.MainFragment;
@@ -60,6 +61,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -167,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     boolean isInitialDisplay = true;
 
     String constName, constCode, wardName, wardCode;
+    MobileServiceClient mobileServiceClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,6 +207,13 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             }
 
 
+        }
+
+        // Hookup Azure mobile service
+        try {
+            mobileServiceClient = AppController.getInstance().getmClient();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
 
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -758,6 +768,11 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         };
 
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void pushToTabeleOneAzure(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
+                                      final String streamStr) {
+
     }
 
     private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total,
