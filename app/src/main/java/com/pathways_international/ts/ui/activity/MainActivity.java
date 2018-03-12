@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
@@ -39,6 +41,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.fragment.MainFragment;
@@ -47,9 +51,12 @@ import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
+import com.pathways_international.ts.ui.model.TabeleOne;
+import com.pathways_international.ts.ui.model.TableTwoDev;
 import com.pathways_international.ts.ui.utils.ImageManager;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
+import com.squareup.okhttp.OkHttpClient;
 import com.vansuita.pickimage.bean.PickResult;
 import com.vansuita.pickimage.bundle.PickSetup;
 import com.vansuita.pickimage.dialog.PickImageDialog;
@@ -69,6 +76,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -143,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     private SessionManager sessionManager;
 
 
-
     String countyStr, streamStr = "";
     String pollStStr = "";
 
@@ -170,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
     String constName, constCode, wardName, wardCode;
     MobileServiceClient mobileServiceClient;
+    MobileServiceTable<TabeleOne> tabeleOneMobileServiceTable;
+    MobileServiceTable<TableTwoDev> tableTwoDevMobileServiceTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,9 +222,24 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         // Hookup Azure mobile service
         try {
             mobileServiceClient = AppController.getInstance().getmClient();
+            // Extend timeout
+            mobileServiceClient.setAndroidHttpClientFactory(new OkHttpClientFactory() {
+                @Override
+                public com.squareup.okhttp.OkHttpClient createOkHttpClient() {
+                    OkHttpClient client = new OkHttpClient();
+                    client.setReadTimeout(20, TimeUnit.SECONDS);
+                    client.setWriteTimeout(20, TimeUnit.SECONDS);
+                    return client;
+                }
+            });
+
+            // get the tables
+            tabeleOneMobileServiceTable = mobileServiceClient.getTable(TabeleOne.class);
+            tableTwoDevMobileServiceTable = mobileServiceClient.getTable(TableTwoDev.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
 
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -355,6 +380,40 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
 
         Log.d(LOG_TAG, String.valueOf(new Date()));
+    }
+
+    /**
+     * Add an item to the Mobile Service Table
+     *
+     * @param item The item to Add
+     */
+    public TabeleOne addItemInTabeleOne(TabeleOne item) throws ExecutionException, InterruptedException {
+        TabeleOne entity = tabeleOneMobileServiceTable.insert(item).get();
+        return entity;
+    }
+
+    /**
+     * Add an item to the Mobile Service Table
+     *
+     * @param item The item to Add
+     */
+    public TableTwoDev addItemInTableTwoDev(TableTwoDev item) throws ExecutionException, InterruptedException {
+        TableTwoDev entity = tableTwoDevMobileServiceTable.insert(item).get();
+        return entity;
+    }
+
+    /**
+     * Run an ASync task on the corresponding executor
+     *
+     * @param task
+     * @return
+     */
+    private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            return task.execute();
+        }
     }
 
 
@@ -568,6 +627,10 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                     pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
                             rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
+                    pushToTabeleOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
+                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+
                     uploadImageClient(iD);
                     uploadImageToAzure(iD);
                     candidatesView.setVisibility(View.GONE);
@@ -770,11 +833,6 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         AppController.getInstance().addToRequestQueue(request);
     }
 
-    private void pushToTabeleOneAzure(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
-                                      final String streamStr) {
-
-    }
-
     private void pushToTableTwo(final String pollStId, final String railaStr, final String uhuruStr, final String spoiltVotesStr, final String total,
                                 final String timeOnDevice) {
         StringRequest request = new StringRequest(Request.Method.POST, Urls.PUSH_TO_TABLE_TWO, new Response.Listener<String>() {
@@ -839,5 +897,74 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         };
 
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+
+    private void pushToTabeleOneAzure(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
+                                      final String streamStr) {
+
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final TabeleOne tabeleOne = new TabeleOne(pollStStr, wardStr, constStr, countyStr, streamStr);
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final TabeleOne entity = addItemInTabeleOne(tabeleOne);
+                    Log.d("Sucess", "Azure");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, entity.getCountyName(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+
+        runAsyncTask(asyncTask);
+
+    }
+
+
+    private void pushTableTwoDevAzure(final String pollStId, final String railaStr, final String uhuruStr, final String registeredVoters,
+                                      final String rejectedBallotPapersStr, final String rejectedObjectedStr, final String disputedVotes,
+                                      final String validVotesStr, final String timeOnDevice) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final TableTwoDev tableTwoDev = new TableTwoDev(pollStId, railaStr, uhuruStr, registeredVoters,
+                rejectedBallotPapersStr, rejectedObjectedStr, disputedVotes, validVotesStr, timeOnDevice);
+
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final TableTwoDev entity = addItemInTableTwoDev(tableTwoDev);
+                    Log.d("Sucess", "Azure");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, entity.getRaila(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+
+        runAsyncTask(asyncTask);
+
+
     }
 }
