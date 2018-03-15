@@ -17,8 +17,8 @@ public class ImageManager {
 
 
     private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;"
-            + "AccountName=[ACCOUNT NAME];"
-            + "AccountKey=[ACCOUNT KEY]";
+            + "AccountName=tsazure;"
+            + "AccountKey=L5LTV1sDp1K1uIkuKfSz0RY1QUXnMgEmKQb1mECtu/o62CBNhAanwwLWsLNIDRcL2cWljulYaecQdJHqZsUz+A==";
 
     private static CloudBlobContainer getContainer() throws Exception {
         // Retrieve storage account from connection string

@@ -8,8 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class TableTwoDev {
 
-    @com.google.gson.annotations.SerializedName("id")
-    public String mId;
+    @SerializedName("id")
+    private String mId;
 
     @SerializedName("poll_station_id")
     private String pollStationId;
@@ -127,5 +127,8 @@ public class TableTwoDev {
         this.timeOnDevice = timeOnDevice;
     }
 
-
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof TableTwoDev && ((TableTwoDev) obj).mId.equals(mId);
+    }
 }

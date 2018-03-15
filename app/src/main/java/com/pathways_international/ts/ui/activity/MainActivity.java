@@ -10,9 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,14 +42,13 @@ import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
-import com.pathways_international.ts.ui.fragment.MainFragment;
-import com.pathways_international.ts.ui.fragment.SettingsActivity;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
-import com.pathways_international.ts.ui.model.TabeleOne;
+import com.pathways_international.ts.ui.model.TableOne;
 import com.pathways_international.ts.ui.model.TableTwoDev;
+import com.pathways_international.ts.ui.model.Uploads;
 import com.pathways_international.ts.ui.utils.ImageManager;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
@@ -178,8 +174,9 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
     String constName, constCode, wardName, wardCode;
     MobileServiceClient mobileServiceClient;
-    MobileServiceTable<TabeleOne> tabeleOneMobileServiceTable;
+    MobileServiceTable<TableOne> tableOneMobileServiceTable;
     MobileServiceTable<TableTwoDev> tableTwoDevMobileServiceTable;
+    MobileServiceTable<Uploads> uploadsMobileServiceTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         ButterKnife.bind(this);
         sqLiteHandler = new SQLiteHandler(getApplicationContext());
         locationsPreference = new LocationSharedPrefs(getApplicationContext());
+        String testingTimeStamp = getTimeStamp().replace(":", "%3A");
+        Log.d("Testing timestamp", testingTimeStamp);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -234,8 +233,9 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             });
 
             // get the tables
-            tabeleOneMobileServiceTable = mobileServiceClient.getTable(TabeleOne.class);
+            tableOneMobileServiceTable = mobileServiceClient.getTable(TableOne.class);
             tableTwoDevMobileServiceTable = mobileServiceClient.getTable(TableTwoDev.class);
+            uploadsMobileServiceTable = mobileServiceClient.getTable(Uploads.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -387,9 +387,8 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
      *
      * @param item The item to Add
      */
-    public TabeleOne addItemInTabeleOne(TabeleOne item) throws ExecutionException, InterruptedException {
-        TabeleOne entity = tabeleOneMobileServiceTable.insert(item).get();
-        return entity;
+    public TableOne addItemInTabeleOne(TableOne item) throws ExecutionException, InterruptedException {
+        return tableOneMobileServiceTable.insert(item).get();
     }
 
     /**
@@ -398,8 +397,11 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
      * @param item The item to Add
      */
     public TableTwoDev addItemInTableTwoDev(TableTwoDev item) throws ExecutionException, InterruptedException {
-        TableTwoDev entity = tableTwoDevMobileServiceTable.insert(item).get();
-        return entity;
+        return tableTwoDevMobileServiceTable.insert(item).get();
+    }
+
+    public Uploads addItemInUploadsTable(Uploads uploads) throws ExecutionException, InterruptedException {
+        return uploadsMobileServiceTable.insert(uploads).get();
     }
 
     /**
@@ -618,21 +620,25 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    final String BLOB_BASE_URL = "https://tsazure.blob.core.windows.net/tsimages/";
+                    final String timeStamp = getTimeStamp();
+                    final String imageName = BLOB_BASE_URL + iD + "_" + timeStamp.replace(":", "%3A");
 
 
-                    pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
+//                    pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
 
-                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, String.valueOf(new Date()));
+//                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, String.valueOf(new Date()));
 
-                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
-                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+//                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+//                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
-                    pushToTabeleOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
-                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
-                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+//                    pushToTableOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
+//                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+//                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
-                    uploadImageClient(iD);
-                    uploadImageToAzure(iD);
+//                    uploadImageClient(iD);
+//                    uploadImageToAzure(iD, timeStamp);
+                    pushToUploadsAzure(imageName, iD);
                     candidatesView.setVisibility(View.GONE);
                     railaTotal.setText("");
                     uhuruTotal.setText("");
@@ -695,9 +701,9 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
-    private String getDateTime() {
+    private String getTimeStamp() {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                "yyyy_MM_dd_HH:mm:ss", Locale.getDefault());
         Date date = new Date();
         return dateFormat.format(date);
     }
@@ -760,12 +766,12 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
     }
 
-    private void uploadImageToAzure(final String pollStationId) {
-        final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
-                Locale.getDefault()).format(new Date());
+    private void uploadImageToAzure(final String pollStationId, final String timeStamp) {
+//        final String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss",
+//                Locale.getDefault()).format(new Date());
 //        pDialog.setMessage("Uploading...");
 //        pDialog.show();
-        final String idTimeSufix = pollStationId + "_" + timeStamp;
+        final String idTimeSuffix = pollStationId + "_" + timeStamp;
         Log.d("Image upload to Azure", "started");
 
         try {
@@ -778,7 +784,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                 @Override
                 public void run() {
                     try {
-                        final String imageName = ImageManager.uploadImage(imageStream, imageLength, idTimeSufix);
+                        final String imageName = ImageManager.uploadImage(imageStream, imageLength, idTimeSuffix);
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -900,21 +906,27 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     }
 
 
-    private void pushToTabeleOneAzure(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
-                                      final String streamStr) {
+    private void pushToTableOneAzure(final String countyStr, final String constStr, final String wardStr, final String pollStStr,
+                                     final String streamStr) {
 
         if (mobileServiceClient == null) {
             return;
         }
 
-        final TabeleOne tabeleOne = new TabeleOne(pollStStr, wardStr, constStr, countyStr, streamStr);
+//        final TableOne tableOne = new TableOne(pollStStr, wardStr, constStr, countyStr, streamStr);
+        final TableOne tableOne = new TableOne();
+        tableOne.setPollCenter(pollStStr);
+        tableOne.setWardName(wardStr);
+        tableOne.setConstituencyName(constStr);
+        tableOne.setCountyName(countyStr);
+        tableOne.setStream(streamStr);
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    final TabeleOne entity = addItemInTabeleOne(tabeleOne);
-                    Log.d("Sucess", "Azure");
+                    final TableOne entity = addItemInTabeleOne(tableOne);
+                    Log.d("Sucess", "Azure TableOne table");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -940,8 +952,18 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             return;
         }
 
-        final TableTwoDev tableTwoDev = new TableTwoDev(pollStId, railaStr, uhuruStr, registeredVoters,
-                rejectedBallotPapersStr, rejectedObjectedStr, disputedVotes, validVotesStr, timeOnDevice);
+//        final TableTwoDev tableTwoDev = new TableTwoDev(pollStId, railaStr, uhuruStr, registeredVoters,
+//                rejectedBallotPapersStr, rejectedObjectedStr, disputedVotes, validVotesStr, timeOnDevice);
+        final TableTwoDev tableTwoDev = new TableTwoDev();
+        tableTwoDev.setPollStationId(pollStId);
+        tableTwoDev.setRaila(railaStr);
+        tableTwoDev.setUhuru(uhuruStr);
+        tableTwoDev.setRegisteredVoters(registeredVoters);
+        tableTwoDev.setRejectedBallotPapers(rejectedBallotPapersStr);
+        tableTwoDev.setRejectedObjected(rejectedObjectedStr);
+        tableTwoDev.setDisputedVotes(disputedVotes);
+        tableTwoDev.setValidVotesCast(validVotesStr);
+        tableTwoDev.setTimeOnDevice(timeOnDevice);
 
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
@@ -949,7 +971,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
             protected Void doInBackground(Void... voids) {
                 try {
                     final TableTwoDev entity = addItemInTableTwoDev(tableTwoDev);
-                    Log.d("Sucess", "Azure");
+                    Log.d("Sucess", "Azure TableTwoDev Table");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -964,6 +986,50 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         };
 
         runAsyncTask(asyncTask);
+
+
+    }
+
+    private void pushToUploadsAzure(final String imageName, final String pollStId) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final Uploads uploads = new Uploads();
+        uploads.setmImage(imageName);
+        uploads.setmPollStationId(pollStId);
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final Uploads item = addItemInUploadsTable(uploads);
+                    Log.d("Success", "Azure Uploads Table");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, item.getmImage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+
+        runAsyncTask(asyncTask);
+    }
+
+    // TODO; Finish this method, to clean up the mess up above
+    private void pushDataToAzure() {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final TableOne tableOne = new TableOne();
+        final TableTwoDev tableTwoDev = new TableTwoDev();
+        final Uploads uploads = new Uploads();
 
 
     }

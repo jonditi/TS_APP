@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by android-dev on 3/12/18.
  */
 
-public class TabeleOne {
+public class TableOne {
 
     @com.google.gson.annotations.SerializedName("id")
     public String mId;
@@ -27,11 +27,11 @@ public class TabeleOne {
     private String stream;
 
 
-    public TabeleOne() {
+    public TableOne() {
     }
 
 
-    public TabeleOne(String pollCenter, String wardName, String constituencyName, String countyName, String stream) {
+    public TableOne(String pollCenter, String wardName, String constituencyName, String countyName, String stream) {
         this.pollCenter = pollCenter;
         this.wardName = wardName;
         this.constituencyName = constituencyName;
@@ -77,5 +77,10 @@ public class TabeleOne {
 
     public void setStream(String stream) {
         this.stream = stream;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof TableOne && ((TableOne) obj).mId.equals(mId);
     }
 }
