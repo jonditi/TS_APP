@@ -5,6 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -18,9 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,16 +31,23 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.pathways_international.ts.R;
 import com.pathways_international.ts.ui.app.AppController;
 import com.pathways_international.ts.ui.helper.LocationSharedPrefs;
 import com.pathways_international.ts.ui.helper.SQLiteHandler;
 import com.pathways_international.ts.ui.helper.SessionManager;
 import com.pathways_international.ts.ui.model.LocationModel;
+import com.pathways_international.ts.ui.model.TurnoutImages;
+import com.pathways_international.ts.ui.model.VoterTurnout;
 import com.pathways_international.ts.ui.utils.CropImage;
 import com.pathways_international.ts.ui.utils.CropImageView;
+import com.pathways_international.ts.ui.utils.ImageManager;
 import com.pathways_international.ts.ui.utils.ImagePicker;
 import com.pathways_international.ts.ui.utils.Urls;
+import com.squareup.okhttp.OkHttpClient;
 import com.vansuita.pickimage.bean.PickResult;
 import com.vansuita.pickimage.bundle.PickSetup;
 import com.vansuita.pickimage.dialog.PickImageDialog;
@@ -51,6 +59,8 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,15 +68,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class VoterTurnout extends AppCompatActivity implements IPickResult {
+public class VoterTurnoutActivity extends AppCompatActivity implements IPickResult {
 
-    private static final String LOG_TAG = VoterTurnout.class.getSimpleName();
+    private static final String LOG_TAG = VoterTurnoutActivity.class.getSimpleName();
 
     @BindView(R.id.submit_button)
     Button buttonSubmit;
@@ -94,6 +106,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
     String totalString;
 
     Bitmap bitmap;
+    private Uri imageUri;
 
     private int position = 0;
     private ImagePicker imagePicker = new ImagePicker();
@@ -127,6 +140,10 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
 
 
     boolean isInitialDisplay = true;
+
+    MobileServiceClient mobileServiceClient;
+    MobileServiceTable<VoterTurnout> voterTurnoutMobileServiceTable;
+    MobileServiceTable<TurnoutImages> turnoutImagesMobileServiceTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +186,27 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
 
         }
 
+        // Hookup Azure mobile service
+        try {
+            mobileServiceClient = AppController.getInstance().getmClient();
+            // Extend timeout
+            mobileServiceClient.setAndroidHttpClientFactory(new OkHttpClientFactory() {
+                @Override
+                public com.squareup.okhttp.OkHttpClient createOkHttpClient() {
+                    OkHttpClient client = new OkHttpClient();
+                    client.setReadTimeout(20, TimeUnit.SECONDS);
+                    client.setWriteTimeout(20, TimeUnit.SECONDS);
+                    return client;
+                }
+            });
+
+            // get the tables
+            voterTurnoutMobileServiceTable = mobileServiceClient.getTable(VoterTurnout.class);
+            turnoutImagesMobileServiceTable = mobileServiceClient.getTable(TurnoutImages.class);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
         pollSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -206,7 +244,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
     void imageViewContainer() {
         position = 1;
         if (pollStStr.isEmpty()) {
-            Toast.makeText(VoterTurnout.this, "Select a poll station first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(VoterTurnoutActivity.this, "Select a poll station first", Toast.LENGTH_SHORT).show();
         } else {
 //            startChooser();
             // To remove image cropping
@@ -230,14 +268,20 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
             constName = constName.replace("'", "\\'");
             pollStStr = pollStStr.replace("'", "\\'");
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnout.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnoutActivity.this);
             builder.setTitle("Post data");
             builder.setMessage("Proceed with posting of data");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    recordTurnout(iD, totalString, String.valueOf(new Date()));
-                    uploadImageClient(iD, totalString);
+                    final String BLOB_BASE_URL = "https://tsazure.blob.core.windows.net/tsimages/";
+                    final String timeStamp = getTimeStamp();
+                    final String imageName = BLOB_BASE_URL + iD + "_" + timeStamp.replace(":", "%3A") + "_" + totalString;
+//                    recordTurnout(iD, totalString, String.valueOf(new Date()));
+                    pushToVoterTurnoutAzure(iD, totalString, timeStamp);
+//                    uploadImageClient(iD, totalString);
+                    uploadTurnoutImageAzure(iD, timeStamp);
+                    pushToTurnoutImagesAzure(imageName, iD);
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -259,6 +303,28 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         imageViewContainer.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
 
 
+    }
+
+    public VoterTurnout addItemInVoterTurnoutTable(VoterTurnout turnout) throws ExecutionException, InterruptedException {
+        return voterTurnoutMobileServiceTable.insert(turnout).get();
+    }
+
+    public TurnoutImages addItemInTurnoutImageTable(TurnoutImages turnoutImages) throws ExecutionException, InterruptedException {
+        return turnoutImagesMobileServiceTable.insert(turnoutImages).get();
+    }
+
+    /**
+     * Run an ASync task on the corresponding executor
+     *
+     * @param task
+     * @return
+     */
+    private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            return task.execute();
+        }
     }
 
     @Override
@@ -334,7 +400,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
                         buttonSubmit.setEnabled(true);
                         Log.d("Upload image", s);
                         // Show dialogbox
-                        AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnout.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnoutActivity.this);
                         builder.setTitle("Success!");
                         builder.setMessage("Data saved successfully");
                         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -401,6 +467,92 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         AppController.getInstance().addToRequestQueue(request);
     }
 
+    private void pushToVoterTurnoutAzure(final String pollStId, final String totalString, final String timeOnDevice) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final VoterTurnout voterTurnout = new VoterTurnout();
+        voterTurnout.setPollStationId(pollStId);
+        voterTurnout.setTotalString(totalString);
+        voterTurnout.setTimeOnDevice(timeOnDevice);
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final VoterTurnout item = addItemInVoterTurnoutTable(voterTurnout);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                            Toast.makeText(VoterTurnoutActivity.this, item.getPollStationId(), Toast.LENGTH_SHORT).show();
+                            Log.d("Success", "Azure VoterTurnout Table");
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+            }
+        };
+
+        runAsyncTask(asyncTask);
+    }
+
+    private void pushToTurnoutImagesAzure(final String imageName, final String pollStId) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        final TurnoutImages turnoutImages = new TurnoutImages();
+        turnoutImages.setmImage(imageName);
+        turnoutImages.setmPollStationId(pollStId);
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final TurnoutImages item = addItemInTurnoutImageTable(turnoutImages);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                            Toast.makeText(VoterTurnoutActivity.this, item.getmImage(), Toast.LENGTH_SHORT).show();
+                            Log.d("Success", "Azure TurnoutImages Table");
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+
+        };
+
+        runAsyncTask(asyncTask);
+    }
+
 
     private void loadConstituencies(String countyStr) {
 
@@ -428,7 +580,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
 
                         }
                         Log.d(LOG_TAG, "" + cosntituencies.size());
-                        constAdapter = new ArrayAdapter<>(VoterTurnout.this, android.R.layout.simple_spinner_dropdown_item, cosntituencies);
+                        constAdapter = new ArrayAdapter<>(VoterTurnoutActivity.this, android.R.layout.simple_spinner_dropdown_item, cosntituencies);
                         constituencySpinner.setAdapter(constAdapter);
 
                         if (constituencySpinner.getVisibility() == View.INVISIBLE) {
@@ -472,7 +624,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
                             wardsList.add(ward);
                         }
 
-                        wardAdapter = new ArrayAdapter<>(VoterTurnout.this, android.R.layout.simple_spinner_dropdown_item, wardsList);
+                        wardAdapter = new ArrayAdapter<>(VoterTurnoutActivity.this, android.R.layout.simple_spinner_dropdown_item, wardsList);
                         wardSpinner.setAdapter(wardAdapter);
                         wardSpinner.setVisibility(View.VISIBLE);
                     }
@@ -524,7 +676,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
-                        pollAdapter = new ArrayAdapter<>(VoterTurnout.this, android.R.layout.simple_spinner_dropdown_item, pollStationList);
+                        pollAdapter = new ArrayAdapter<>(VoterTurnoutActivity.this, android.R.layout.simple_spinner_dropdown_item, pollStationList);
                         pollSpinner.setAdapter(pollAdapter);
                         pollSpinner.setVisibility(View.VISIBLE);
                     }
@@ -580,7 +732,7 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
                         }
 
                         Log.d(LOG_TAG, "" + pollStationId.size());
-                        pollStreamAdapter = new ArrayAdapter<>(VoterTurnout.this, android.R.layout.simple_spinner_dropdown_item, pollStationStreamList);
+                        pollStreamAdapter = new ArrayAdapter<>(VoterTurnoutActivity.this, android.R.layout.simple_spinner_dropdown_item, pollStationStreamList);
                         streamSpinner.setAdapter(pollStreamAdapter);
                         streamSpinner.setVisibility(View.VISIBLE);
                     }
@@ -596,6 +748,61 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
         });
 
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void uploadTurnoutImageAzure(final String pollStationId, final String timeStamp) {
+        final String idTimeSuffix = pollStationId + "_" + timeStamp;
+        Log.d("Image upload to Azure", "started");
+
+
+        try {
+            final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+            final int imageLength = imageStream.available();
+
+            final Handler handler = new Handler();
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final String imageName = ImageManager.uploadTurnoutImage(imageStream, imageLength, idTimeSuffix);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (pDialog.isShowing()) {
+                                    pDialog.dismiss();
+                                }
+//                                Toast.makeText(VoterTurnoutActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnoutActivity.this);
+                                builder.setTitle("Success!");
+                                builder.setMessage("Data saved successfully");
+                                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+                                Log.d("Image upload to Azure", "Success");
+
+                            }
+                        });
+                    } catch (Exception e) {
+                        final String exceptionMessage = e.getMessage();
+                        handler.post(new Runnable() {
+                            public void run() {
+                                Toast.makeText(VoterTurnoutActivity.this, exceptionMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -643,9 +850,18 @@ public class VoterTurnout extends AppCompatActivity implements IPickResult {
             imageViewContainer.setImageBitmap(pickResult.getBitmap());
 
             bitmap = pickResult.getBitmap();
+            imageUri = pickResult.getUri();
 
             buttonSubmit.setEnabled(true);
         }
     }
+
+    private String getTimeStamp() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy_MM_dd_HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
 
 }

@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
      *
      * @param item The item to Add
      */
-    public TableOne addItemInTabeleOne(TableOne item) throws ExecutionException, InterruptedException {
+    public TableOne addItemInTableOne(TableOne item) throws ExecutionException, InterruptedException {
         return tableOneMobileServiceTable.insert(item).get();
     }
 
@@ -490,6 +490,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray jsonArray = jsonObject.getJSONArray("location");
+                    Log.d("Array length", String.valueOf(jsonArray.length()));
                     if (jsonArray.length() > 0) {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
@@ -511,6 +512,8 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                         pollStreamAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, pollStationStreamList);
                         streamSpinner.setAdapter(pollStreamAdapter);
                         streamSpinner.setVisibility(View.VISIBLE);
+                    } else {
+                        streamSpinner.setVisibility(View.INVISIBLE);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -536,7 +539,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.turnout_menu_item) {
-            startActivity(new Intent(this, VoterTurnout.class));
+            startActivity(new Intent(this, VoterTurnoutActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -544,13 +547,17 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     @OnClick(R.id.imageview_container)
     void imageViewContainer() {
         position = 1;
-        if (pollStStr.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
-        } else {
+        if (streamSpinner.getVisibility() == View.VISIBLE) {
+            if (pollStStr.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Select a poll station first", Toast.LENGTH_SHORT).show();
+            } else {
 //            startChooser();
-            PickImageDialog.build(new PickSetup()).show(this);
+                Log.d("PollStationString", pollStStr);
+                PickImageDialog.build(new PickSetup()).show(this);
+            }
+        } else {
+            Toast.makeText(this, "No stream info available, select another polling center!", Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @OnClick(R.id.submit_button)
@@ -632,13 +639,14 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 //                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
 //                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
-//                    pushToTableOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
-//                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
-//                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+                    pushToTableOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
+                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
 
 //                    uploadImageClient(iD);
-//                    uploadImageToAzure(iD, timeStamp);
+                    uploadImageToAzure(iD, timeStamp);
                     pushToUploadsAzure(imageName, iD);
+                    processStream(iD);
                     candidatesView.setVisibility(View.GONE);
                     railaTotal.setText("");
                     uhuruTotal.setText("");
@@ -788,7 +796,11 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(MainActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
+                                if (pDialog.isShowing()) {
+                                    pDialog.dismiss();
+                                }
+//                                Toast.makeText(MainActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
+                                Log.d("Image upload to Azure", "Success");
 
                             }
                         });
@@ -923,14 +935,22 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+//                pDialog.setMessage("Posting Data");
+//                pDialog.show();
+            }
+
+            @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    final TableOne entity = addItemInTabeleOne(tableOne);
-                    Log.d("Sucess", "Azure TableOne table");
+                    final TableOne entity = addItemInTableOne(tableOne);
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, entity.getCountyName(), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, entity.getCountyName(), Toast.LENGTH_SHORT).show();
+                            Log.d("Sucess", "Azure TableOne table");
                         }
                     });
                 } catch (final Exception e) {
@@ -968,14 +988,22 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
             protected Void doInBackground(Void... voids) {
                 try {
                     final TableTwoDev entity = addItemInTableTwoDev(tableTwoDev);
-                    Log.d("Sucess", "Azure TableTwoDev Table");
+//                    processStream(pollStId);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, entity.getRaila(), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, entity.getRaila(), Toast.LENGTH_SHORT).show();
+                            Log.d("Sucess", "Azure TableTwoDev Table");
                         }
                     });
                 } catch (final Exception e) {
@@ -1001,14 +1029,35 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
             protected Void doInBackground(Void... voids) {
                 try {
                     final Uploads item = addItemInUploadsTable(uploads);
-                    Log.d("Success", "Azure Uploads Table");
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, item.getmImage(), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, item.getmImage(), Toast.LENGTH_SHORT).show();
+                            Log.d("Success", "Azure Uploads Table");
+                            // Show dialogbox
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Success!");
+                            builder.setMessage("Data saved successfully");
+                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
                         }
                     });
                 } catch (final Exception e) {
@@ -1019,6 +1068,34 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         };
 
         runAsyncTask(asyncTask);
+    }
+
+    private void processStream(final String pollStId) {
+        StringRequest request = new StringRequest(Request.Method.POST, Urls.PROCESS_STREAM, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("ProcessStream", response);
+                if (response.contains("processed")) {
+                    // Clear the spinner
+                    streamSpinner.setAdapter(null);
+                    loadPollStreamsRemote(pollStStr);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Error", error.getMessage());
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("poll_station_id", pollStId);
+                return params;
+            }
+        };
+
+        AppController.getInstance().addToRequestQueue(request);
     }
 
     // TODO; Finish this method, to clean up the mess up above

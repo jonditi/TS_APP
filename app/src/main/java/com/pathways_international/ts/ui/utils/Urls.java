@@ -28,4 +28,5 @@ public class Urls {
     public static String REGISTER = baseUrl + "register.php";
     public static String PUSH_TO_VOTER_TURNOUT = baseUrl + "push_to_voter_turnout.php";
     public static String VERIFY_KEY = baseUrl + "verify_key.php";
+    public static String PROCESS_STREAM = baseUrl + "process_stream.php";
 }
