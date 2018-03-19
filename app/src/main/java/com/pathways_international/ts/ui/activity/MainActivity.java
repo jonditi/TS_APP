@@ -1,5 +1,6 @@
 package com.pathways_international.ts.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -631,22 +632,17 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                     final String timeStamp = getTimeStamp();
                     final String imageName = BLOB_BASE_URL + iD + "_" + timeStamp.replace(":", "%3A");
 
-
-//                    pushToTabeleOne(countyStr, constName, wardName, pollStStr, streamStr);
-
-//                    pushToTableTwo(iD, railaStr, uhuruStr, spoiltKura, total, String.valueOf(new Date()));
-
-//                    pushToTableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
-//                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
-
-                    pushToTableOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
-                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+                    TableOne tableOne = new TableOne(countyStr, constName, wardName, pollStStr, streamStr);
+                    TableTwoDev tableTwoDev = new TableTwoDev(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
                             rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+                    Uploads uploads = new Uploads(imageName, iD);
 
-//                    uploadImageClient(iD);
-                    uploadImageToAzure(iD, timeStamp);
-                    pushToUploadsAzure(imageName, iD);
-                    processStream(iD);
+//                    pushToTableOneAzure(countyStr, constName, wardName, pollStStr, streamStr);
+//                    pushTableTwoDevAzure(iD, railaStr, uhuruStr, registerdVoters, rejectedBallotPapersStr,
+//                            rejectedObjectedStr, disputedVotes, validVotesStr, String.valueOf(new Date()));
+                    pushDataToAzure(tableOne, tableTwoDev, uploads, iD, timeStamp);
+
+//                    processStream(iD);
                     candidatesView.setVisibility(View.GONE);
                     railaTotal.setText("");
                     uhuruTotal.setText("");
@@ -793,30 +789,31 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
                 public void run() {
                     try {
                         final String imageName = ImageManager.uploadImage(imageStream, imageLength, idTimeSuffix);
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (pDialog.isShowing()) {
-                                    pDialog.dismiss();
-                                }
-//                                Toast.makeText(MainActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
-                                Log.d("Image upload to Azure", "Success");
-
-                            }
-                        });
+//                        handler.post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                if (pDialog.isShowing()) {
+//                                    pDialog.dismiss();
+//                                }
+////                                Toast.makeText(MainActivity.this, imageName + " uploaded to azure", Toast.LENGTH_SHORT).show();
+//                                Log.d("Image upload to Azure", "Success");
+//
+//                            }
+//                        });
                     } catch (Exception e) {
                         final String exceptionMessage = e.getMessage();
-                        handler.post(new Runnable() {
-                            public void run() {
-                                Toast.makeText(MainActivity.this, exceptionMessage, Toast.LENGTH_SHORT).show();
-                            }
-                        });
+//                        handler.post(new Runnable() {
+//                            public void run() {
+//                                Toast.makeText(MainActivity.this, exceptionMessage, Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
                     }
                 }
             });
             thread.start();
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 
@@ -933,7 +930,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         tableOne.setCountyName(countyStr);
         tableOne.setStream(streamStr);
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -986,7 +983,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         tableTwoDev.setTimeOnDevice(timeOnDevice);
 
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -1027,7 +1024,7 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
         uploads.setmImage(imageName);
         uploads.setmPollStationId(pollStId);
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -1099,15 +1096,67 @@ public class MainActivity extends AppCompatActivity implements IPickResult {
     }
 
     // TODO; Finish this method, to clean up the mess up above
-    private void pushDataToAzure() {
+    private void pushDataToAzure(final TableOne tableOne, final TableTwoDev tableTwoDev, final Uploads uploads,
+                                 final String pollStationId, final String timeStamp) {
         if (mobileServiceClient == null) {
             return;
         }
 
-        final TableOne tableOne = new TableOne();
-        final TableTwoDev tableTwoDev = new TableTwoDev();
-        final Uploads uploads = new Uploads();
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
 
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final TableOne item = addItemInTableOne(tableOne);
+                    final TableTwoDev entity = addItemInTableTwoDev(tableTwoDev);
+                    final Uploads azureUpload = addItemInUploadsTable(uploads);
+                    final String idTimeSuffix = pollStationId + "_" + timeStamp;
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final int imageLength = imageStream.available();
 
+                    final String imageName = ImageManager.uploadImage(imageStream, imageLength, idTimeSuffix);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            processStream(pollStationId);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Success!");
+                            builder.setMessage("Data saved successfully");
+                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                            Log.d("Sucess", " Data saved in Azure Tables");
+                            Log.d("TableOne", item.getCountyName());
+                            Log.d("TableTwoDev", entity.getRaila());
+                            Log.d("Image Uploaded", imageName);
+                            Log.d("Uploads", azureUpload.getmImage());
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                pDialog.dismiss();
+            }
+        };
+
+        runAsyncTask(asyncTask);
     }
 }

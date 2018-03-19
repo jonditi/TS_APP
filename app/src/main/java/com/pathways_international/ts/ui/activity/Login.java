@@ -90,8 +90,21 @@ public class Login extends AppCompatActivity {
                 Intent intent = new Intent(Login.this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            } else if (!session.getAgentType().isEmpty() && session.getAgentType().equals("free agent")) {
+                // User is already logged in. Take him to main activity
+                Intent intent = new Intent(Login.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
 
+        } else if (!session.isLoggedIn() && session.getAgentType().equals("free agent")) {
+            // User is already logged in. Take him to main activity
+            db.addUser("Free", "Agent", "00000000", "0712345678", "59bfdf6a9168f2.42580276", "238", "KISUMU EAST", "KISUMU",
+                    "KOLWA CENTRAL", "1190", "2017-09-18 08:45:53");
+            session.setLogin(true);
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         }
 
 

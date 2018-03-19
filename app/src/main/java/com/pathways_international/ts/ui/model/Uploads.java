@@ -19,6 +19,11 @@ public class Uploads {
     public Uploads() {
     }
 
+    public Uploads(String mImage, String mPollStationId) {
+        this.mImage = mImage;
+        this.mPollStationId = mPollStationId;
+    }
+
     public String getmId() {
         return mId;
     }

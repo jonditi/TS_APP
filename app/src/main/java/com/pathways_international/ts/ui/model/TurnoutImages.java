@@ -19,6 +19,11 @@ public class TurnoutImages {
     public TurnoutImages() {
     }
 
+    public TurnoutImages(String mImage, String mPollStationId) {
+        this.mImage = mImage;
+        this.mPollStationId = mPollStationId;
+    }
+
     public String getmId() {
         return mId;
     }

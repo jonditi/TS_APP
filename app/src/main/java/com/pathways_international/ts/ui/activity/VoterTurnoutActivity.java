@@ -1,5 +1,6 @@
 package com.pathways_international.ts.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -277,11 +278,17 @@ public class VoterTurnoutActivity extends AppCompatActivity implements IPickResu
                     final String BLOB_BASE_URL = "https://tsazure.blob.core.windows.net/tsimages/";
                     final String timeStamp = getTimeStamp();
                     final String imageName = BLOB_BASE_URL + iD + "_" + timeStamp.replace(":", "%3A") + "_" + totalString;
-//                    recordTurnout(iD, totalString, String.valueOf(new Date()));
-                    pushToVoterTurnoutAzure(iD, totalString, timeStamp);
-//                    uploadImageClient(iD, totalString);
-                    uploadTurnoutImageAzure(iD, timeStamp);
-                    pushToTurnoutImagesAzure(imageName, iD);
+
+                    VoterTurnout voterTurnout = new VoterTurnout(iD, totalString, timeStamp);
+                    TurnoutImages turnoutImages = new TurnoutImages(imageName, iD);
+
+
+//                    pushToVoterTurnoutAzure(iD, totalString, timeStamp);
+//
+//                    uploadTurnoutImageAzure(iD, timeStamp);
+//                    pushToTurnoutImagesAzure(imageName, iD);
+
+                    pushDataToAzure(voterTurnout, turnoutImages, iD, timeStamp);
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -477,7 +484,7 @@ public class VoterTurnoutActivity extends AppCompatActivity implements IPickResu
         voterTurnout.setTotalString(totalString);
         voterTurnout.setTimeOnDevice(timeOnDevice);
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -831,6 +838,69 @@ public class VoterTurnoutActivity extends AppCompatActivity implements IPickResu
         };
 
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+    private void pushDataToAzure(final VoterTurnout voterTurnout, final TurnoutImages turnoutImages,
+                                 final String pollStationId, final String timeStamp) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final VoterTurnout item = addItemInVoterTurnoutTable(voterTurnout);
+                    final TurnoutImages entity = addItemInTurnoutImageTable(turnoutImages);
+                    final String idTimeSuffix = pollStationId + "_" + timeStamp;
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final int imageLength = imageStream.available();
+
+                    final String imageName = ImageManager.uploadTurnoutImage(imageStream, imageLength, idTimeSuffix);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                            Toast.makeText(MainActivity.this, entity.getRaila(), Toast.LENGTH_SHORT).show();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(VoterTurnoutActivity.this);
+                            builder.setTitle("Success!");
+                            builder.setMessage("Data saved successfully");
+                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                            Log.d("Sucess", " Data saved in Azure Tables");
+                            Log.d("Image Uploaded", imageName);
+                            Log.d("VoterTurnout", item.getTotalString());
+                            Log.d("Turnout Image", entity.getmImage());
+
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                pDialog.dismiss();
+            }
+        };
+
+        runAsyncTask(asyncTask);
     }
 
     private void showDialog() {

@@ -1,5 +1,6 @@
 package com.pathways_international.ts.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -237,14 +238,23 @@ public class CTC extends AppCompatActivity implements IPickResult {
                     final String BLOB_BASE_URL = "https://tsazure.blob.core.windows.net/tsimages/";
                     final String timeStamp = getTimeStamp();
                     final String imageName = BLOB_BASE_URL + constCode + "_" + timeStamp;
-//                    pushToConstituencyTallying(pollStationCodeStr, pollStationNameStr, railaStr, uhuruStr, registeredVotersStr, rejectedBallotStr,
-//                            validVotesStr, county, constName);
-                    pushToTallyingCenterAzure(pollStationCodeStr, pollStationNameStr, railaStr, uhuruStr, registeredVotersStr, rejectedBallotStr,
+
+
+                    ConstituencyTallyingCenter tallyingCenter =
+                            new ConstituencyTallyingCenter(pollStationCodeStr, pollStationNameStr, railaStr,
+                                    uhuruStr, registeredVotersStr, rejectedBallotStr,
                             validVotesStr, county, constName);
 
+                    ConstituencyUploads constituencyUploads = new ConstituencyUploads(imageName, constCode);
+
+
+//                    pushToTallyingCenterAzure(pollStationCodeStr, pollStationNameStr, railaStr, uhuruStr, registeredVotersStr, rejectedBallotStr,
+//                            validVotesStr, county, constName);
+
 //                    uploadImageClient(constCode);
-                    uploadConstImageAzure(constCode, timeStamp);
-                    pushToConstUploadsAzure(imageName, constCode);
+//                    uploadConstImageAzure(constCode, timeStamp);
+//                    pushToConstUploadsAzure(imageName, constCode);
+                    pushDataToAzure(tallyingCenter, constituencyUploads, constCode, timeStamp);
                     candidatesView.setVisibility(View.GONE);
                     railaTotal.setText("");
                     uhuruTotal.setText("");
@@ -486,7 +496,7 @@ public class CTC extends AppCompatActivity implements IPickResult {
         tallyingCenter.setCounty(county);
         tallyingCenter.setConstituency(constituency);
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -532,7 +542,7 @@ public class CTC extends AppCompatActivity implements IPickResult {
         constituencyUploads.setImage(imageName);
         constituencyUploads.setConstituencyCode(constCode);
 
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -563,6 +573,70 @@ public class CTC extends AppCompatActivity implements IPickResult {
                             AlertDialog alertDialog = builder.create();
                             alertDialog.show();
                             Log.d("Success", "Azure ConstUploads Table");
+                        }
+                    });
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                pDialog.dismiss();
+            }
+        };
+
+        runAsyncTask(asyncTask);
+    }
+
+    private void pushDataToAzure(final ConstituencyTallyingCenter tallyingCenter, final ConstituencyUploads cUploads,
+                                 final String constCode, final String timeStamp) {
+        if (mobileServiceClient == null) {
+            return;
+        }
+
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                pDialog.setMessage("Posting Data");
+                pDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    final ConstituencyTallyingCenter item = addItemInTallyingCenter(tallyingCenter);
+                    final ConstituencyUploads entity = addItemInConstUploads(cUploads);
+
+                    final String idTimeSuffix = constCode + "_" + timeStamp;
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+
+                    final int imageLength = imageStream.available();
+                    final String imageName = ImageManager.uploadConstituencyImage(imageStream, imageLength, idTimeSuffix);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(CTC.this);
+                            builder.setTitle("Success!");
+                            builder.setMessage("Data saved successfully");
+                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                            Log.d("Sucess", " Data saved in Azure Tables");
+                            Log.d("Image Uploaded", imageName);
+                            Log.d("TallyinCenter", item.getConstituency());
+                            Log.d("Constituency Upload", entity.getImage());
+
                         }
                     });
                 } catch (final Exception e) {

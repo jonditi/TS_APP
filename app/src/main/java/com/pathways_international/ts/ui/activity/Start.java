@@ -20,6 +20,8 @@ public class Start extends AppCompatActivity {
     Button constituencyAgent;
     @BindView(R.id.poll_station_agent)
     Button pollstationAgent;
+    @BindView(R.id.agent_jojo)
+    Button freeAgent;
 
     private SessionManager sessionManager;
 
@@ -41,6 +43,9 @@ public class Start extends AppCompatActivity {
                 } else if (sessionManager.getAgentType().equals("polling station agent")) {
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                     finish();
+                } else if (sessionManager.getAgentType().equals("free agent")) {
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    finish();
                 }
             }
         }
@@ -57,6 +62,13 @@ public class Start extends AppCompatActivity {
     @OnClick(R.id.poll_station_agent)
     void pollAgent() {
         sessionManager.setAgentType("polling station agent");
+        startActivity(new Intent(getApplicationContext(), Login.class));
+        finish();
+    }
+
+    @OnClick(R.id.agent_jojo)
+    void freeAgent() {
+        sessionManager.setAgentType("free agent");
         startActivity(new Intent(getApplicationContext(), Login.class));
         finish();
     }

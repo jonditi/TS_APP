@@ -57,6 +57,19 @@
             android:text="@string/poll_station_agent"
             android:textColor="@color/white"
             android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/agent_jojo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp"
+            android:background="@drawable/btn_bac"
+            android:paddingBottom="20dp"
+            android:paddingTop="20dp"
+            android:text="@string/free_agent"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
     </LinearLayout>
 
 

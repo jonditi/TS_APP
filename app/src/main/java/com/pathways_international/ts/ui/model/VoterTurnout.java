@@ -22,6 +22,12 @@ public class VoterTurnout {
     public VoterTurnout() {
     }
 
+    public VoterTurnout(String pollStationId, String totalString, String timeOnDevice) {
+        this.pollStationId = pollStationId;
+        this.totalString = totalString;
+        this.timeOnDevice = timeOnDevice;
+    }
+
     public String getmId() {
         return mId;
     }

@@ -40,6 +40,20 @@ public class ConstituencyTallyingCenter {
     public ConstituencyTallyingCenter() {
     }
 
+    public ConstituencyTallyingCenter(String pollingStationCode, String pollingStationName,
+                                      String raila, String uhuru, String registeredVoters, String rejectedBallot,
+                                      String validVotesCast, String county, String constituency) {
+        this.pollingStationCode = pollingStationCode;
+        this.pollingStationName = pollingStationName;
+        this.raila = raila;
+        this.uhuru = uhuru;
+        this.registeredVoters = registeredVoters;
+        this.rejectedBallot = rejectedBallot;
+        this.validVotesCast = validVotesCast;
+        this.county = county;
+        this.constituency = constituency;
+    }
+
     public String getmId() {
         return mId;
     }

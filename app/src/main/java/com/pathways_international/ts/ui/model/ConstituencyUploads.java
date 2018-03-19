@@ -19,6 +19,11 @@ public class ConstituencyUploads {
     public ConstituencyUploads() {
     }
 
+    public ConstituencyUploads(String image, String constituencyCode) {
+        this.image = image;
+        this.constituencyCode = constituencyCode;
+    }
+
     public String getmId() {
         return mId;
     }
